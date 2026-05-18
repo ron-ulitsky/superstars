@@ -8,4 +8,4 @@ ENV NODE_ENV=production
 ENV PORT=3000
 EXPOSE 3000
 
-CMD ["node", "./bin/top-stargazers-server.mjs"]
+CMD ["node", "./bin/server.mjs"]

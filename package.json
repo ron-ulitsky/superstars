@@ -1,16 +1,16 @@
 {
-  "name": "top-stargazers-card",
+  "name": "superstars",
   "version": "0.1.0",
-  "description": "Generate a README-friendly SVG showing a repo's top stargazers by follower count.",
+  "description": "Generate README-friendly SVGs showing curated notable accounts that starred a repo.",
   "type": "module",
   "bin": {
-    "top-stargazers-card": "./bin/top-stargazers-card.mjs",
-    "top-stargazers-server": "./bin/top-stargazers-server.mjs"
+    "superstars": "./bin/superstars.mjs",
+    "superstars-server": "./bin/server.mjs"
   },
   "scripts": {
-    "demo": "node ./bin/top-stargazers-card.mjs --demo --repo owner/repo --output top-stargazers.svg",
-    "serve": "node ./bin/top-stargazers-server.mjs",
-    "check": "node --check ./bin/top-stargazers-card.mjs && node --check ./bin/top-stargazers-server.mjs && node ./bin/top-stargazers-card.mjs --demo --repo owner/repo --output top-stargazers.svg --limit 5"
+    "demo": "node ./bin/superstars.mjs --demo --repo owner/repo --output superstars.svg",
+    "serve": "node ./bin/server.mjs",
+    "check": "node --check ./bin/superstars.mjs && node --check ./bin/server.mjs && node ./bin/superstars.mjs --demo --repo owner/repo --output superstars.svg --limit 5"
   },
   "engines": {
     "node": ">=18"

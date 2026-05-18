@@ -1,4 +1,4 @@
-name: Update top stargazers
+name: Update superstars card
 
 on:
   workflow_dispatch:
@@ -16,10 +16,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - run: node ./bin/top-stargazers-card.mjs --repo "$GITHUB_REPOSITORY" --output top-stargazers.svg --limit 8 --max-stargazers 1000 --exclude-bots
+      - run: node ./bin/superstars.mjs --repo "$GITHUB_REPOSITORY" --output superstars.svg --limit 8 --max-stargazers 1000
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: "Update top stargazers card"
-          file_pattern: top-stargazers.svg
+          commit_message: "Update superstars card"
+          file_pattern: superstars.svg

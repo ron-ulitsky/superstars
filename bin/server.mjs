@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { createServer } from "node:http";
-import { buildSuperstarsSvg, buildTopStargazersSvg, DEFAULTS, parseRepo } from "./top-stargazers-card.mjs";
+import { buildSuperstarsSvg, DEFAULTS, parseRepo } from "./superstars.mjs";
 
 const DEFAULT_PORT = Number.parseInt(process.env.PORT || "3000", 10);
 const DEFAULT_CACHE_TTL_SECONDS = Number.parseInt(process.env.CACHE_TTL_SECONDS || "21600", 10);
@@ -28,9 +28,6 @@ const server = createServer(async (request, response) => {
     }
 
     const options = optionsFromSearchParams(url.searchParams);
-    if (route.mode) {
-      options.mode = route.mode;
-    }
     const cacheKey = JSON.stringify({ ...route, ...options });
     const cached = getCached(cacheKey);
 
@@ -39,14 +36,11 @@ const server = createServer(async (request, response) => {
       return;
     }
 
-    const input = {
+    const svg = await buildSuperstarsSvg({
       ...options,
       repo: `${route.owner}/${route.name}`,
       token: process.env.GITHUB_TOKEN || process.env.GH_TOKEN,
-    };
-    const svg = options.mode === "superstars"
-      ? await buildSuperstarsSvg(input)
-      : await buildTopStargazersSvg(input);
+    });
 
     cache.set(cacheKey, { svg, expiresAt: Date.now() + DEFAULT_CACHE_TTL_SECONDS * 1000, createdAt: Date.now() });
     sendSvg(response, svg, 0, request.method);
@@ -61,7 +55,7 @@ const server = createServer(async (request, response) => {
 });
 
 server.listen(DEFAULT_PORT, () => {
-  console.log(`Top Stargazers Card listening on http://localhost:${DEFAULT_PORT}`);
+  console.log(`Superstars listening on http://localhost:${DEFAULT_PORT}`);
   console.log(`Try http://localhost:${DEFAULT_PORT}/owner/repo.svg?demo=1`);
 });
 
@@ -71,26 +65,21 @@ function parseSvgRoute(pathname) {
   }
 
   const parts = pathname.slice(1, -4).split("/").map(decodeURIComponent);
-  if (parts.length !== 2 && !(parts.length === 3 && parts[2] === "superstars")) {
+  if (parts.length !== 2) {
     return null;
   }
 
   const [owner, name] = parts;
-  const mode = parts[2] || null;
   parseRepo(`${owner}/${name}`);
-  return { owner, name, mode };
+  return { owner, name };
 }
 
 function optionsFromSearchParams(searchParams) {
   return {
     limit: readInt(searchParams, "limit", DEFAULTS.limit),
     maxStargazers: readInt(searchParams, "maxStargazers", readInt(searchParams, "max_stargazers", DEFAULTS.maxStargazers)),
-    minFollowers: readInt(searchParams, "minFollowers", readInt(searchParams, "min_followers", DEFAULTS.minFollowers)),
-    concurrency: readInt(searchParams, "concurrency", DEFAULTS.concurrency),
     theme: searchParams.get("theme") || DEFAULTS.theme,
-    excludeBots: readBool(searchParams, "excludeBots") || readBool(searchParams, "exclude_bots"),
     demo: readBool(searchParams, "demo"),
-    mode: searchParams.get("mode") || DEFAULTS.mode,
   };
 }
 
@@ -151,10 +140,10 @@ function sendText(response, status, body) {
 
 function usageText(request) {
   const host = request.headers.host || "localhost:3000";
-  return `Top Stargazers Card
+  return `Superstars
 
 Embed:
-![Top stargazers](https://${host}/owner/repo.svg)
+![Superstars](https://${host}/owner/repo.svg)
 
 Local demo:
 http://${host}/owner/repo.svg?demo=1
@@ -162,18 +151,20 @@ http://${host}/owner/repo.svg?demo=1
 Options:
 limit=6
 maxStargazers=500
-minFollowers=0
 theme=light|dark
-excludeBots=1
+demo=1
+
+List:
+https://github.com/ron-ulitsky/superstars
 `;
 }
 
 function renderErrorSvg(error) {
   const message = escapeXml(error.message || "Unknown error");
   return `<?xml version="1.0" encoding="UTF-8"?>
-<svg width="720" height="120" viewBox="0 0 720 120" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Top stargazers error">
+<svg width="720" height="120" viewBox="0 0 720 120" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Superstars error">
   <rect x="0.5" y="0.5" width="719" height="119" rx="10" fill="#fff8f8" stroke="#ffb3b3"/>
-  <text x="24" y="40" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="18" font-weight="700" fill="#b42318">Top stargazers unavailable</text>
+  <text x="24" y="40" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="18" font-weight="700" fill="#b42318">Superstars unavailable</text>
   <text x="24" y="70" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="13" fill="#57606a">${message}</text>
 </svg>
 `;
