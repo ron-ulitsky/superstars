@@ -1,12 +1,20 @@
 # Superstars
 
-Generate README-friendly SVGs showing curated notable accounts that starred a repository.
+GitHub stars are useful, but they are a noisy trust signal.
+
+People use star counts to decide which libraries to try, which projects look healthy, which tools deserve attention, and sometimes even which companies or maintainers are worth taking seriously. That makes stars valuable, and valuable metrics get gamed. Recent research on fake GitHub stars found millions of suspected fake stars and notes that star count is widely used as a popularity signal while being vulnerable to artificial inflation ([arXiv](https://arxiv.org/abs/2412.13459)). A shorter summary from SC Media describes the same pattern: fraudulent stars can boost malicious or low-quality repositories, so users should look beyond star count alone ([SC Media](https://www.scworld.com/brief/fraudulent-rating-boosting-stars-prevalent-in-github)).
+
+Superstars adds a different kind of signal: **who** starred a repository.
+
+Instead of treating every star as equal, this project checks whether a repo has been starred by people on a curated list of prominent technical accounts. A star from a known maintainer, language creator, educator, researcher, or respected builder is not proof that a project is good, but it is harder to fake than raw star volume and often more informative than the total count.
+
+Superstars generates README-friendly SVGs showing curated notable accounts that starred a repository.
 
 ```md
 ![Superstars](https://superstars.onrender.com/owner/repo.svg)
 ```
 
-The badge checks a curated list of prominent tech and open source accounts, then displays any matches found among the sampled stargazers. The list is visible in the SVG footer:
+The badge checks a curated list of prominent tech and open source accounts, then displays any matches found among the sampled stargazers. The list is visible in the SVG footer so readers can inspect the source of the signal:
 
 ```text
 Superstars list: ron-ulitsky/superstars
