@@ -14,7 +14,7 @@ Superstars generates README-friendly SVGs showing curated notable accounts that 
 ![Superstars](https://superstars.onrender.com/owner/repo.svg)
 ```
 
-The badge checks a curated list of prominent tech and open source accounts, then displays any matches found among the sampled stargazers. The list is visible in the SVG footer so readers can inspect the source of the signal:
+The badge checks a curated list of prominent tech and open source accounts, then displays any matches whose starred repositories include the target repo. The list is visible in the SVG footer so readers can inspect the source of the signal:
 
 ```text
 Superstars list: ron-ulitsky/superstars
@@ -29,19 +29,20 @@ Superstars list: ron-ulitsky/superstars
 With options:
 
 ```md
-![Superstars](https://superstars.onrender.com/facebook/react.svg?limit=8&maxStargazers=1000&theme=dark)
+![Superstars](https://superstars.onrender.com/facebook/react.svg?limit=8&maxStarredReposPerUser=1000&theme=dark)
 ```
 
 Supported URL options:
 
 ```text
 limit=6
-maxStargazers=500
+maxStarredReposPerUser=1000
+batchSize=10
 theme=light|dark
 demo=1
 ```
 
-`maxStargazers` controls how many stargazers are sampled before checking the Superstars list. GitHub does not expose an API for asking whether arbitrary users starred a repo in bulk, so this is transparent sampling rather than a perfect census for very large repositories.
+`maxStarredReposPerUser` controls how many starred repositories are scanned for each account on the Superstars list. GitHub does not expose a direct arbitrary-user check like "did user X star repo Y?", so this scans each superstar's starred repositories with a transparent per-user cap.
 
 ## Run Locally
 
@@ -64,7 +65,7 @@ GITHUB_TOKEN=github_pat_xxx npm run serve
 Then request:
 
 ```text
-http://localhost:3000/facebook/react.svg?limit=8&maxStargazers=1000
+http://localhost:3000/facebook/react.svg?limit=8&maxStarredReposPerUser=1000
 ```
 
 ## Deploy
@@ -136,7 +137,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - run: node ./bin/superstars.mjs --repo "$GITHUB_REPOSITORY" --output superstars.svg --limit 8 --max-stargazers 1000
+      - run: node ./bin/superstars.mjs --repo "$GITHUB_REPOSITORY" --output superstars.svg --limit 8 --max-starred-repos-per-user 1000
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - uses: stefanzweifel/git-auto-commit-action@v5

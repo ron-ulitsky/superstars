@@ -77,7 +77,16 @@ function parseSvgRoute(pathname) {
 function optionsFromSearchParams(searchParams) {
   return {
     limit: readInt(searchParams, "limit", DEFAULTS.limit),
-    maxStargazers: readInt(searchParams, "maxStargazers", readInt(searchParams, "max_stargazers", DEFAULTS.maxStargazers)),
+    maxStarredReposPerUser: readInt(
+      searchParams,
+      "maxStarredReposPerUser",
+      readInt(
+        searchParams,
+        "max_starred_repos_per_user",
+        readInt(searchParams, "maxStargazers", readInt(searchParams, "max_stargazers", DEFAULTS.maxStarredReposPerUser)),
+      ),
+    ),
+    batchSize: readInt(searchParams, "batchSize", readInt(searchParams, "batch_size", DEFAULTS.batchSize)),
     theme: searchParams.get("theme") || DEFAULTS.theme,
     demo: readBool(searchParams, "demo"),
   };
@@ -150,7 +159,8 @@ http://${host}/owner/repo.svg?demo=1
 
 Options:
 limit=6
-maxStargazers=500
+maxStarredReposPerUser=1000
+batchSize=10
 theme=light|dark
 demo=1
 

@@ -16,7 +16,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - run: node ./bin/superstars.mjs --repo "$GITHUB_REPOSITORY" --output superstars.svg --limit 8 --max-stargazers 1000
+      - run: node ./bin/superstars.mjs --repo "$GITHUB_REPOSITORY" --output superstars.svg --limit 8 --max-starred-repos-per-user 1000
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - uses: stefanzweifel/git-auto-commit-action@v5

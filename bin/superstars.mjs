@@ -6,7 +6,8 @@ import { fileURLToPath } from "node:url";
 
 export const DEFAULTS = {
   limit: 6,
-  maxStargazers: 500,
+  maxStarredReposPerUser: 1000,
+  batchSize: 10,
   output: "superstars.svg",
   theme: "light",
 };
@@ -50,30 +51,16 @@ export async function buildSuperstarsSvg(input) {
   const options = normalizeOptions(input);
   const repo = parseRepo(options.repo);
   const superstars = options.superstars || await loadSuperstars();
-  const stargazers = options.demo ? demoUsers : await fetchStargazers(repo, options);
-  const stargazerByLogin = new Map(stargazers.map((user) => [String(user.login).toLowerCase(), user]));
-  const matched = [];
-
-  for (const superstar of superstars) {
-    const stargazer = stargazerByLogin.get(superstar.login.toLowerCase());
-    if (!stargazer) {
-      continue;
-    }
-
-    matched.push({
-      ...stargazer,
-      ...superstar,
-      html_url: stargazer.html_url || `https://github.com/${superstar.login}`,
-      avatar_url: stargazer.avatar_url || superstar.avatarUrl,
-    });
-  }
+  const result = options.demo
+    ? buildDemoResult(superstars)
+    : await findSuperstarMatches(repo, superstars, options);
 
   return renderSuperstarsSvg({
     repo: `${repo.owner}/${repo.name}`,
-    users: matched.slice(0, options.limit),
+    users: result.matches.slice(0, options.limit),
     checked: superstars.length,
-    sampled: stargazers.length,
-    maxStargazers: options.demo ? demoUsers.length : options.maxStargazers,
+    scanned: result.scanned,
+    maxStarredReposPerUser: options.demo ? demoUsers.length : options.maxStarredReposPerUser,
     generatedAt: new Date(),
     theme: options.theme,
   });
@@ -89,7 +76,11 @@ export function normalizeOptions(input = {}) {
     token: process.env.GITHUB_TOKEN || process.env.GH_TOKEN,
     ...input,
     limit: toNonNegativeInt(input.limit ?? DEFAULTS.limit, "limit"),
-    maxStargazers: toPositiveInt(input.maxStargazers ?? DEFAULTS.maxStargazers, "max-stargazers"),
+    maxStarredReposPerUser: toPositiveInt(
+      input.maxStarredReposPerUser ?? input.maxStargazers ?? DEFAULTS.maxStarredReposPerUser,
+      "max-starred-repos-per-user",
+    ),
+    batchSize: toPositiveInt(input.batchSize ?? DEFAULTS.batchSize, "batch-size"),
   };
 }
 
@@ -118,7 +109,13 @@ export function parseArgs(args) {
         options.limit = toNonNegativeInt(readValue(), "limit");
         break;
       case "--max-stargazers":
-        options.maxStargazers = toPositiveInt(readValue(), "max-stargazers");
+        options.maxStarredReposPerUser = toPositiveInt(readValue(), "max-stargazers");
+        break;
+      case "--max-starred-repos-per-user":
+        options.maxStarredReposPerUser = toPositiveInt(readValue(), "max-starred-repos-per-user");
+        break;
+      case "--batch-size":
+        options.batchSize = toPositiveInt(readValue(), "batch-size");
         break;
       case "--token":
         options.token = readValue();
@@ -159,34 +156,126 @@ export function parseRepo(value) {
   return { owner, name };
 }
 
-export async function fetchStargazers(repo, options) {
-  const users = [];
-  const perPage = 100;
-  const pages = Math.ceil(options.maxStargazers / perPage);
+function buildDemoResult(superstars) {
+  const demoByLogin = new Map(demoUsers.map((user) => [user.login.toLowerCase(), user]));
+  const matches = [];
 
-  for (let page = 1; page <= pages; page += 1) {
-    const remaining = options.maxStargazers - users.length;
-    const pageSize = Math.min(perPage, remaining);
-    const url = `https://api.github.com/repos/${encodeURIComponent(repo.owner)}/${encodeURIComponent(repo.name)}/stargazers?per_page=${pageSize}&page=${page}`;
-    const pageUsers = await githubJson(url, options);
-
-    if (!Array.isArray(pageUsers) || pageUsers.length === 0) {
-      break;
-    }
-
-    users.push(...pageUsers);
-
-    if (pageUsers.length < pageSize || users.length >= options.maxStargazers) {
-      break;
+  for (const superstar of superstars) {
+    const demoUser = demoByLogin.get(superstar.login.toLowerCase());
+    if (demoUser) {
+      matches.push({
+        ...demoUser,
+        ...superstar,
+        html_url: demoUser.html_url || `https://github.com/${superstar.login}`,
+        avatar_url: demoUser.avatar_url || superstar.avatarUrl,
+      });
     }
   }
 
-  return users.slice(0, options.maxStargazers);
+  return { matches, scanned: demoUsers.length };
 }
 
-async function githubJson(url, options) {
+export async function findSuperstarMatches(repo, superstars, options) {
+  if (!options.token) {
+    throw new Error("GITHUB_TOKEN or GH_TOKEN is required for GraphQL superstar checks");
+  }
+
+  const target = `${repo.owner}/${repo.name}`.toLowerCase();
+  const states = superstars.map((superstar) => ({
+    superstar,
+    cursor: null,
+    done: false,
+    scanned: 0,
+  }));
+  const matches = [];
+  let scanned = 0;
+
+  while (states.some((state) => !state.done)) {
+    const batch = states
+      .filter((state) => !state.done)
+      .slice(0, options.batchSize);
+
+    const result = await fetchStarredRepositoryBatch(batch, options);
+
+    for (const state of batch) {
+      const user = result[state.superstar.login];
+      if (!user) {
+        state.done = true;
+        continue;
+      }
+
+      const starred = user.starredRepositories;
+      const repos = starred.nodes || [];
+      const found = repos.some((starredRepo) => starredRepo.nameWithOwner.toLowerCase() === target);
+      state.scanned += repos.length;
+      scanned += repos.length;
+
+      if (found) {
+        matches.push({
+          ...state.superstar,
+          login: user.login || state.superstar.login,
+          name: state.superstar.name || user.name,
+          html_url: user.url || `https://github.com/${state.superstar.login}`,
+          avatar_url: user.avatarUrl || state.superstar.avatarUrl,
+        });
+        state.done = true;
+        continue;
+      }
+
+      if (!starred.pageInfo.hasNextPage || state.scanned >= options.maxStarredReposPerUser) {
+        state.done = true;
+        continue;
+      }
+
+      state.cursor = starred.pageInfo.endCursor;
+    }
+  }
+
+  return { matches, scanned };
+}
+
+async function fetchStarredRepositoryBatch(states, options) {
+  const variables = {};
+  const fields = states.map((state, index) => {
+    variables[`login${index}`] = state.superstar.login;
+    variables[`after${index}`] = state.cursor;
+    variables[`first${index}`] = Math.min(100, options.maxStarredReposPerUser - state.scanned);
+
+    return `u${index}: user(login: $login${index}) {
+      login
+      name
+      url
+      avatarUrl(size: 80)
+      starredRepositories(first: $first${index}, after: $after${index}, orderBy: { field: STARRED_AT, direction: DESC }) {
+        pageInfo {
+          hasNextPage
+          endCursor
+        }
+        nodes {
+          nameWithOwner
+        }
+      }
+    }`;
+  }).join("\n");
+
+  const declarations = states
+    .map((_, index) => `$login${index}: String!, $after${index}: String, $first${index}: Int!`)
+    .join(", ");
+  const query = `query(${declarations}) { ${fields} }`;
+  const data = await githubGraphql(query, variables, options);
+  const users = {};
+
+  states.forEach((state, index) => {
+    users[state.superstar.login] = data[`u${index}`];
+  });
+
+  return users;
+}
+
+async function githubGraphql(query, variables, options) {
   const headers = {
     Accept: "application/vnd.github+json",
+    "Content-Type": "application/json",
     "User-Agent": "superstars",
     "X-GitHub-Api-Version": "2022-11-28",
   };
@@ -195,16 +284,26 @@ async function githubJson(url, options) {
     headers.Authorization = `Bearer ${options.token}`;
   }
 
-  const response = await fetch(url, { headers });
+  const response = await fetch("https://api.github.com/graphql", {
+    method: "POST",
+    headers,
+    body: JSON.stringify({ query, variables }),
+  });
+
   if (!response.ok) {
     const body = await response.text();
-    throw new Error(`GitHub API ${response.status} for ${url}: ${body.slice(0, 200)}`);
+    throw new Error(`GitHub GraphQL ${response.status}: ${body.slice(0, 200)}`);
   }
 
-  return response.json();
+  const payload = await response.json();
+  if (payload.errors?.length) {
+    throw new Error(`GitHub GraphQL error: ${payload.errors.map((error) => error.message).join("; ")}`);
+  }
+
+  return payload.data;
 }
 
-export function renderSuperstarsSvg({ repo, users, checked, sampled, maxStargazers, generatedAt, theme }) {
+export function renderSuperstarsSvg({ repo, users, checked, scanned, maxStarredReposPerUser, generatedAt, theme }) {
   const palette = theme === "dark"
     ? {
         bg: "#0d1117",
@@ -232,12 +331,12 @@ export function renderSuperstarsSvg({ repo, users, checked, sampled, maxStargaze
   const height = top + Math.max(users.length, 1) * rowHeight + footerHeight;
   const rows = users.length > 0
     ? users.map((user, index) => renderSuperstarRow(user, index, top + index * rowHeight, palette)).join("\n")
-    : `<text x="24" y="${top + 20}" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="14" fill="${palette.muted}">No superstars found in the sampled stargazers.</text>`;
+    : `<text x="24" y="${top + 20}" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="14" fill="${palette.muted}">No superstars found among scanned starred repositories.</text>`;
 
   return `<?xml version="1.0" encoding="UTF-8"?>
 <svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
   <title id="title">Superstars for ${escapeXml(repo)}</title>
-  <desc id="desc">Curated notable accounts found among sampled GitHub stargazers using ${escapeXml(listRepo)}.</desc>
+  <desc id="desc">Curated notable accounts that starred this GitHub repository using ${escapeXml(listRepo)}.</desc>
   <rect x="0.5" y="0.5" width="${width - 1}" height="${height - 1}" rx="10" fill="${palette.bg}" stroke="${palette.border}"/>
   <text x="24" y="34" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="20" font-weight="700" fill="${palette.title}">Superstars</text>
   <text x="24" y="58" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="14" fill="${palette.text}">${escapeXml(repo)} - curated notable stargazers</text>
@@ -247,8 +346,8 @@ ${rows}
   <a href="${escapeXml(listUrl)}" target="_blank">
     <text x="24" y="${height - 38}" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="12" fill="${palette.accent}">Superstars list: ${escapeXml(listRepo)}</text>
   </a>
-  <text x="24" y="${height - 20}" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="12" fill="${palette.muted}">Checked ${escapeXml(formatNumber(checked))} superstars against ${escapeXml(formatNumber(sampled))} sampled stargazers - generated ${escapeXml(formatDate(generatedAt))}</text>
-  <text x="620" y="${height - 20}" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="12" fill="${palette.muted}">scan cap ${escapeXml(formatNumber(maxStargazers))}</text>
+  <text x="24" y="${height - 20}" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="12" fill="${palette.muted}">Checked ${escapeXml(formatNumber(checked))} superstars across ${escapeXml(formatNumber(scanned))} starred repos - generated ${escapeXml(formatDate(generatedAt))}</text>
+  <text x="562" y="${height - 20}" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="12" fill="${palette.muted}">per-user cap ${escapeXml(formatNumber(maxStarredReposPerUser))}</text>
 </svg>
 `;
 }
@@ -316,7 +415,10 @@ Options:
   --repo owner/name          Repository to scan. GitHub URLs are also accepted.
   --output path              SVG output path. Default: superstars.svg
   --limit number             Number of superstars to show. Default: 6
-  --max-stargazers number    Number of stargazers to sample from newest-first API pages. Default: 500
+  --max-starred-repos-per-user number
+                              Number of starred repos to scan per superstar. Default: 1000
+  --max-stargazers number    Deprecated alias for --max-starred-repos-per-user.
+  --batch-size number        Number of superstars to check in each GraphQL request. Default: 10
   --token token              GitHub token. Defaults to GITHUB_TOKEN or GH_TOKEN.
   --theme light|dark         SVG theme. Default: light
   --demo                     Render a demo card without calling GitHub.
