@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: top-stargazers-card
+    runtime: docker
+    envVars:
+      - key: CACHE_TTL_SECONDS
+        value: 21600
+      - key: GITHUB_TOKEN
+        sync: false

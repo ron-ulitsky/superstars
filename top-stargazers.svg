@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="720" height="302" viewBox="0 0 720 302" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">Top stargazers for owner/repo</title>
+  <desc id="desc">Top GitHub stargazers sorted by follower count.</desc>
+  <rect x="0.5" y="0.5" width="719" height="301" rx="10" fill="#ffffff" stroke="#d0d7de"/>
+  <text x="24" y="34" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="20" font-weight="700" fill="#24292f">Top stargazers</text>
+  <text x="24" y="58" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="14" fill="#57606a">owner/repo - ranked by GitHub followers</text>
+  <rect x="558" y="22" width="138" height="28" rx="14" fill="#f6f8fa" stroke="#d0d7de"/>
+  <text x="627" y="41" text-anchor="middle" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="12" font-weight="600" fill="#0969da">6 sampled</text>
+  <text x="24" y="107" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="14" font-weight="700" fill="#0969da">#1</text>
+  <text x="64" y="107" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="14" font-weight="600" fill="#24292f">Linus Torvalds (@torvalds)</text>
+  <text x="460" y="107" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="13" fill="#57606a">250K followers</text>
+  <text x="600" y="107" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="13" fill="#6e7781">8 repos</text>
+  <text x="24" y="141" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="14" font-weight="700" fill="#0969da">#2</text>
+  <text x="64" y="141" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="14" font-weight="600" fill="#24292f">Dan Abramov (@gaearon)</text>
+  <text x="460" y="141" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="13" fill="#57606a">90K followers</text>
+  <text x="600" y="141" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="13" fill="#6e7781">330 repos</text>
+  <text x="24" y="175" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="14" font-weight="700" fill="#0969da">#3</text>
+  <text x="64" y="175" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="14" font-weight="600" fill="#24292f">Sindre Sorhus (@sindresorhus)</text>
+  <text x="460" y="175" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="13" fill="#57606a">74K followers</text>
+  <text x="600" y="175" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="13" fill="#6e7781">1,200 repos</text>
+  <text x="24" y="209" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="14" font-weight="700" fill="#0969da">#4</text>
+  <text x="64" y="209" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="14" font-weight="600" fill="#24292f">Addy Osmani (@addyosmani)</text>
+  <text x="460" y="209" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="13" fill="#57606a">46K followers</text>
+  <text x="600" y="209" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="13" fill="#6e7781">210 repos</text>
+  <text x="24" y="243" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="14" font-weight="700" fill="#0969da">#5</text>
+  <text x="64" y="243" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="14" font-weight="600" fill="#24292f">Evan You (@yyx990803)</text>
+  <text x="460" y="243" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="13" fill="#57606a">43K followers</text>
+  <text x="600" y="243" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="13" fill="#6e7781">120 repos</text>
+  <text x="24" y="282" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="12" fill="#6e7781">Generated 2026-05-18 - scanned up to 6 stargazers</text>
+</svg>

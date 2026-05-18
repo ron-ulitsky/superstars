@@ -1,0 +1,25 @@
+name: Update top stargazers
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 3 * * *"
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node ./bin/top-stargazers-card.mjs --repo "$GITHUB_REPOSITORY" --output top-stargazers.svg --limit 8 --max-stargazers 1000 --exclude-bots
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "Update top stargazers card"
+          file_pattern: top-stargazers.svg
