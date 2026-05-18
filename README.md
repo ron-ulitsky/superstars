@@ -97,7 +97,14 @@ The sync job stores each superstar's starred repositories in Postgres. After tha
 repo -> matching superstars
 ```
 
-Schedule `npm run sync` as a cron job to refresh the index. The included `render.yaml` defines a `sync-superstars` cron service that runs every 6 hours.
+The included GitHub Actions workflow, [`.github/workflows/sync-superstars.yml`](./.github/workflows/sync-superstars.yml), runs `npm run sync` every 6 hours. Add these repository secrets:
+
+```text
+DATABASE_URL=<your Neon connection string>
+SUPERSTARS_GITHUB_TOKEN=<GitHub token>
+```
+
+You can also run it manually from the GitHub Actions tab with **Run workflow**.
 
 ## Deploy
 
@@ -107,8 +114,9 @@ This repo includes a `Dockerfile` and `render.yaml`, so the quickest deploy path
 2. Add `DATABASE_URL` from Neon as a secret environment variable.
 3. Add `GITHUB_TOKEN` as a secret environment variable.
 4. Deploy.
-5. Run the `sync-superstars` cron job once, or wait for its schedule.
-6. Embed `https://your-service.onrender.com/owner/repo.svg` in a README.
+5. Add the same `DATABASE_URL` and `SUPERSTARS_GITHUB_TOKEN` secrets to GitHub Actions.
+6. Run the **Sync superstars index** workflow once, or wait for its schedule.
+7. Embed `https://your-service.onrender.com/owner/repo.svg` in a README.
 
 Any Docker host works too:
 
@@ -147,34 +155,28 @@ See [`SUPERSTARS.md`](./SUPERSTARS.md) for how to suggest list additions, remova
 
 ## GitHub Actions
 
-Most users should prefer the hosted badge. The workflow below is for repos that want to generate and commit their own `superstars.svg` instead of relying on a third-party image URL.
-
-Add this workflow to `.github/workflows/update-superstars.yml`:
+The project uses GitHub Actions as the free scheduler for the Neon index:
 
 ```yaml
-name: Update superstars card
+name: Sync superstars index
 
 on:
   workflow_dispatch:
   schedule:
-    - cron: "17 3 * * *"
-
-permissions:
-  contents: write
+    - cron: "17 */6 * * *"
 
 jobs:
-  update:
+  sync:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - run: node ./bin/superstars.mjs --repo "$GITHUB_REPOSITORY" --output superstars.svg --limit 8 --max-starred-repos-per-user 1000
+          cache: npm
+      - run: npm install
+      - run: npm run sync
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - uses: stefanzweifel/git-auto-commit-action@v5
-        with:
-          commit_message: "Update superstars card"
-          file_pattern: superstars.svg
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          GITHUB_TOKEN: ${{ secrets.SUPERSTARS_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
 ```

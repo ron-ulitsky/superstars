@@ -9,13 +9,3 @@ services:
         sync: false
       - key: GITHUB_TOKEN
         sync: false
-  - type: cron
-    name: sync-superstars
-    runtime: docker
-    schedule: "17 */6 * * *"
-    dockerCommand: npm run sync
-    envVars:
-      - key: DATABASE_URL
-        sync: false
-      - key: GITHUB_TOKEN
-        sync: false
