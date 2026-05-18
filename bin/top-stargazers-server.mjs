@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { createServer } from "node:http";
-import { buildTopStargazersSvg, DEFAULTS, parseRepo } from "./top-stargazers-card.mjs";
+import { buildSuperstarsSvg, buildTopStargazersSvg, DEFAULTS, parseRepo } from "./top-stargazers-card.mjs";
 
 const DEFAULT_PORT = Number.parseInt(process.env.PORT || "3000", 10);
 const DEFAULT_CACHE_TTL_SECONDS = Number.parseInt(process.env.CACHE_TTL_SECONDS || "21600", 10);
@@ -28,6 +28,9 @@ const server = createServer(async (request, response) => {
     }
 
     const options = optionsFromSearchParams(url.searchParams);
+    if (route.mode) {
+      options.mode = route.mode;
+    }
     const cacheKey = JSON.stringify({ ...route, ...options });
     const cached = getCached(cacheKey);
 
@@ -36,11 +39,14 @@ const server = createServer(async (request, response) => {
       return;
     }
 
-    const svg = await buildTopStargazersSvg({
+    const input = {
       ...options,
       repo: `${route.owner}/${route.name}`,
       token: process.env.GITHUB_TOKEN || process.env.GH_TOKEN,
-    });
+    };
+    const svg = options.mode === "superstars"
+      ? await buildSuperstarsSvg(input)
+      : await buildTopStargazersSvg(input);
 
     cache.set(cacheKey, { svg, expiresAt: Date.now() + DEFAULT_CACHE_TTL_SECONDS * 1000, createdAt: Date.now() });
     sendSvg(response, svg, 0, request.method);
@@ -60,15 +66,19 @@ server.listen(DEFAULT_PORT, () => {
 });
 
 function parseSvgRoute(pathname) {
-  const match = pathname.match(/^\/([^/]+)\/([^/]+)\.svg$/);
-  if (!match) {
+  if (!pathname.endsWith(".svg")) {
     return null;
   }
 
-  const owner = decodeURIComponent(match[1]);
-  const name = decodeURIComponent(match[2]);
+  const parts = pathname.slice(1, -4).split("/").map(decodeURIComponent);
+  if (parts.length !== 2 && !(parts.length === 3 && parts[2] === "superstars")) {
+    return null;
+  }
+
+  const [owner, name] = parts;
+  const mode = parts[2] || null;
   parseRepo(`${owner}/${name}`);
-  return { owner, name };
+  return { owner, name, mode };
 }
 
 function optionsFromSearchParams(searchParams) {
@@ -80,6 +90,7 @@ function optionsFromSearchParams(searchParams) {
     theme: searchParams.get("theme") || DEFAULTS.theme,
     excludeBots: readBool(searchParams, "excludeBots") || readBool(searchParams, "exclude_bots"),
     demo: readBool(searchParams, "demo"),
+    mode: searchParams.get("mode") || DEFAULTS.mode,
   };
 }
 

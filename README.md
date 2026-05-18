@@ -1,6 +1,6 @@
-# Top Stargazers Card
+# Starproof
 
-Generate a README-friendly SVG that shows a repository's stargazers sorted by follower count.
+Generate README-friendly SVGs that show who starred a repository, not just how many people starred it.
 
 The hosted version is meant to be a one-line README embed:
 
@@ -8,10 +8,17 @@ The hosted version is meant to be a one-line README embed:
 ![Top stargazers](https://top-stargazers.example.com/owner/repo.svg)
 ```
 
+The more opinionated mode is **Superstars**: a curated list of prominent tech and open source accounts. The badge checks whether any of those accounts appear among the sampled stargazers.
+
+```md
+![Superstars](https://top-stargazers.example.com/owner/repo/superstars.svg)
+```
+
 With options:
 
 ```md
 ![Top stargazers](https://top-stargazers.example.com/owner/repo.svg?limit=8&minFollowers=100&excludeBots=1&theme=dark)
+![Superstars](https://top-stargazers.example.com/owner/repo/superstars.svg?limit=6&maxStargazers=1000&theme=dark)
 ```
 
 ## Run The Hosted Badge Locally
@@ -24,6 +31,7 @@ Then open:
 
 ```text
 http://localhost:3000/owner/repo.svg?demo=1
+http://localhost:3000/owner/repo/superstars.svg?demo=1
 ```
 
 For a real repo, set a GitHub token and request `/owner/repo.svg`:
@@ -44,10 +52,19 @@ maxStargazers=500
 minFollowers=0
 theme=light|dark
 excludeBots=1
+mode=top|superstars
 demo=1
 ```
 
 The server caches rendered cards in memory. Set `CACHE_TTL_SECONDS` to tune the cache duration. Set `PORT` to change the HTTP port.
+
+## Superstars
+
+The curated list lives in [`data/superstars.json`](./data/superstars.json). Each entry has a GitHub login, display name, and a short blurb that can appear in the SVG.
+
+Superstar badges may include profile links and avatar images in the raw SVG. In GitHub README Markdown, SVGs are embedded as images, so internal links are usually not clickable and external avatar images may depend on the renderer. The text-only fallback remains the important part.
+
+See [`SUPERSTARS.md`](./SUPERSTARS.md) for how to suggest list additions, removals, blurbs, or a better name than "Superstars."
 
 ## Deploy
 
@@ -93,6 +110,7 @@ node ./bin/top-stargazers-card.mjs \
   --max-stargazers 1000 \
   --min-followers 50 \
   --exclude-bots \
+  --mode superstars \
   --theme dark
 ```
 

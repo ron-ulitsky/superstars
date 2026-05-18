@@ -1,0 +1,77 @@
+[
+  {
+    "login": "torvalds",
+    "name": "Linus Torvalds",
+    "blurb": "Creator of Linux and Git"
+  },
+  {
+    "login": "gaearon",
+    "name": "Dan Abramov",
+    "blurb": "React core alum and educator"
+  },
+  {
+    "login": "sindresorhus",
+    "name": "Sindre Sorhus",
+    "blurb": "Prolific open source maintainer"
+  },
+  {
+    "login": "yyx990803",
+    "name": "Evan You",
+    "blurb": "Creator of Vue and Vite"
+  },
+  {
+    "login": "addyosmani",
+    "name": "Addy Osmani",
+    "blurb": "Web performance and Chrome engineering leader"
+  },
+  {
+    "login": "karpathy",
+    "name": "Andrej Karpathy",
+    "blurb": "AI educator and neural networks researcher"
+  },
+  {
+    "login": "paulg",
+    "name": "Paul Graham",
+    "blurb": "Programmer, essayist, and startup investor"
+  },
+  {
+    "login": "dhh",
+    "name": "David Heinemeier Hansson",
+    "blurb": "Creator of Ruby on Rails"
+  },
+  {
+    "login": "tj",
+    "name": "TJ Holowaychuk",
+    "blurb": "Influential Node.js and Go open source author"
+  },
+  {
+    "login": "kentcdodds",
+    "name": "Kent C. Dodds",
+    "blurb": "JavaScript educator and testing advocate"
+  },
+  {
+    "login": "rauchg",
+    "name": "Guillermo Rauch",
+    "blurb": "Vercel CEO and Next.js ecosystem builder"
+  },
+  {
+    "login": "matz",
+    "name": "Yukihiro Matsumoto",
+    "blurb": "Creator of Ruby"
+  },
+  {
+    "login": "mitsuhiko",
+    "name": "Armin Ronacher",
+    "blurb": "Creator of Flask, Jinja, and Click"
+  },
+  {
+    "login": "antirez",
+    "name": "Salvatore Sanfilippo",
+    "blurb": "Creator of Redis"
+  },
+  {
+    "login": "defunkt",
+    "name": "Chris Wanstrath",
+    "blurb": "GitHub co-founder"
+  }
+]
