@@ -58,9 +58,10 @@ export async function buildSuperstarsSvg(input) {
   return renderSuperstarsSvg({
     repo: `${repo.owner}/${repo.name}`,
     users: result.matches.slice(0, options.limit),
-    checked: superstars.length,
+    checked: result.checked || superstars.length,
     scanned: result.scanned,
     maxStarredReposPerUser: options.demo ? demoUsers.length : options.maxStarredReposPerUser,
+    indexed: Boolean(result.indexed),
     generatedAt: new Date(),
     theme: options.theme,
   });
@@ -74,6 +75,7 @@ export function normalizeOptions(input = {}) {
   return {
     ...DEFAULTS,
     token: process.env.GITHUB_TOKEN || process.env.GH_TOKEN,
+    databaseUrl: process.env.DATABASE_URL,
     ...input,
     limit: toNonNegativeInt(input.limit ?? DEFAULTS.limit, "limit"),
     maxStarredReposPerUser: toPositiveInt(
@@ -176,6 +178,13 @@ function buildDemoResult(superstars) {
 }
 
 export async function findSuperstarMatches(repo, superstars, options) {
+  if (options.databaseUrl) {
+    const indexed = await findIndexedSuperstarMatches(repo, superstars, options);
+    if (indexed) {
+      return indexed;
+    }
+  }
+
   if (!options.token) {
     throw new Error("GITHUB_TOKEN or GH_TOKEN is required for GraphQL superstar checks");
   }
@@ -232,6 +241,28 @@ export async function findSuperstarMatches(repo, superstars, options) {
   }
 
   return { matches, scanned };
+}
+
+async function findIndexedSuperstarMatches(repo, superstars, options) {
+  const db = await import("../lib/db.mjs");
+  const hasData = await db.hasIndexedData();
+
+  if (!hasData) {
+    return null;
+  }
+
+  const repoFullName = `${repo.owner}/${repo.name}`;
+  const [matches, stats] = await Promise.all([
+    db.getIndexedSuperstarMatches(repoFullName, options.limit),
+    db.getIndexStats(),
+  ]);
+
+  return {
+    matches,
+    scanned: stats.scanned,
+    checked: stats.checked || superstars.length,
+    indexed: true,
+  };
 }
 
 async function fetchStarredRepositoryBatch(states, options) {
@@ -303,7 +334,7 @@ async function githubGraphql(query, variables, options) {
   return payload.data;
 }
 
-export function renderSuperstarsSvg({ repo, users, checked, scanned, maxStarredReposPerUser, generatedAt, theme }) {
+export function renderSuperstarsSvg({ repo, users, checked, scanned, maxStarredReposPerUser, indexed, generatedAt, theme }) {
   const palette = theme === "dark"
     ? {
         bg: "#0d1117",
@@ -347,7 +378,7 @@ ${rows}
     <text x="24" y="${height - 38}" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="12" fill="${palette.accent}">Superstars list: ${escapeXml(listRepo)}</text>
   </a>
   <text x="24" y="${height - 20}" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="12" fill="${palette.muted}">Checked ${escapeXml(formatNumber(checked))} superstars across ${escapeXml(formatNumber(scanned))} starred repos - generated ${escapeXml(formatDate(generatedAt))}</text>
-  <text x="562" y="${height - 20}" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="12" fill="${palette.muted}">per-user cap ${escapeXml(formatNumber(maxStarredReposPerUser))}</text>
+  <text x="${indexed ? 606 : 562}" y="${height - 20}" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="12" fill="${palette.muted}">${indexed ? "indexed" : `per-user cap ${escapeXml(formatNumber(maxStarredReposPerUser))}`}</text>
 </svg>
 `;
 }

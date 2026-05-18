@@ -5,5 +5,17 @@ services:
     envVars:
       - key: CACHE_TTL_SECONDS
         value: 21600
+      - key: DATABASE_URL
+        sync: false
+      - key: GITHUB_TOKEN
+        sync: false
+  - type: cron
+    name: sync-superstars
+    runtime: docker
+    schedule: "17 */6 * * *"
+    dockerCommand: npm run sync
+    envVars:
+      - key: DATABASE_URL
+        sync: false
       - key: GITHUB_TOKEN
         sync: false

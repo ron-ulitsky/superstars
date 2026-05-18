@@ -9,8 +9,13 @@
   },
   "scripts": {
     "demo": "node ./bin/superstars.mjs --demo --repo owner/repo --output superstars.svg",
+    "db:migrate": "node ./bin/migrate.mjs",
+    "sync": "node ./bin/sync-superstars.mjs",
     "serve": "node ./bin/server.mjs",
     "check": "node --check ./bin/superstars.mjs && node --check ./bin/server.mjs && node ./bin/superstars.mjs --demo --repo owner/repo --output superstars.svg --limit 5"
+  },
+  "dependencies": {
+    "pg": "^8.13.1"
   },
   "engines": {
     "node": ">=18"

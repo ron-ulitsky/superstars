@@ -68,20 +68,53 @@ Then request:
 http://localhost:3000/facebook/react.svg?limit=8&maxStarredReposPerUser=1000
 ```
 
+## Persistent Index
+
+For production, use a Postgres database such as Neon. The web service reads from `DATABASE_URL` when indexed data exists, so README image renders do not need to crawl GitHub.
+
+Set these environment variables on the web service:
+
+```text
+DATABASE_URL=postgres://...
+GITHUB_TOKEN=github_pat_xxx
+```
+
+Run the migration once:
+
+```sh
+npm run db:migrate
+```
+
+Then run the sync job to index every account in [`data/superstars.json`](./data/superstars.json):
+
+```sh
+npm run sync
+```
+
+The sync job stores each superstar's starred repositories in Postgres. After that, badge requests do a fast lookup:
+
+```text
+repo -> matching superstars
+```
+
+Schedule `npm run sync` as a cron job to refresh the index. The included `render.yaml` defines a `sync-superstars` cron service that runs every 6 hours.
+
 ## Deploy
 
 This repo includes a `Dockerfile` and `render.yaml`, so the quickest deploy path is Render:
 
 1. Create a new Render Blueprint from this repo.
-2. Add `GITHUB_TOKEN` as a secret environment variable.
-3. Deploy.
-4. Embed `https://your-service.onrender.com/owner/repo.svg` in a README.
+2. Add `DATABASE_URL` from Neon as a secret environment variable.
+3. Add `GITHUB_TOKEN` as a secret environment variable.
+4. Deploy.
+5. Run the `sync-superstars` cron job once, or wait for its schedule.
+6. Embed `https://your-service.onrender.com/owner/repo.svg` in a README.
 
 Any Docker host works too:
 
 ```sh
 docker build -t superstars .
-docker run -p 3000:3000 -e GITHUB_TOKEN=github_pat_xxx superstars
+docker run -p 3000:3000 -e DATABASE_URL=postgres://... -e GITHUB_TOKEN=github_pat_xxx superstars
 ```
 
 The server caches rendered cards in memory. Set `CACHE_TTL_SECONDS` to tune the cache duration. Set `PORT` to change the HTTP port.
