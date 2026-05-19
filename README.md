@@ -34,12 +34,18 @@ Compact format:
 ![Superstars](https://superstars.onrender.com/facebook/react.svg?format=compact)
 ```
 
+Compact format with blurbs:
+
+```md
+![Superstars](https://superstars.onrender.com/facebook/react.svg?format=compact-blurbs)
+```
+
 Supported URL options:
 
 ```text
 limit=6
 theme=light|dark
-format=card|compact
+format=card|compact|compact-blurbs
 ```
 
 ## Try It On Your Repo

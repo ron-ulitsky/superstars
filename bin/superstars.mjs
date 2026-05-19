@@ -383,6 +383,10 @@ export function renderSuperstarsSvg({ repo, users, checked, scanned, maxStarredR
     return renderCompactSuperstarsSvg({ repo, users, checked, scanned, generatedAt, palette });
   }
 
+  if (format === "compact-blurbs") {
+    return renderCompactBlurbsSuperstarsSvg({ repo, users, checked, scanned, generatedAt, palette });
+  }
+
   const width = 760;
   const rowHeight = 58;
   const top = 88;
@@ -431,6 +435,38 @@ function renderCompactSuperstarsSvg({ repo, users, checked, scanned, generatedAt
 <svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
   <title id="title">Notable people who starred ${escapeXml(repo)}</title>
   <desc id="desc">Compact list of notable accounts from ${escapeXml(listRepo)} that starred this GitHub repository.</desc>
+  <rect x="0.5" y="0.5" width="${width - 1}" height="${height - 1}" rx="10" fill="${palette.bg}" stroke="${palette.border}"/>
+  <text x="24" y="32" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="19" font-weight="700" fill="${palette.title}">Notable people who starred this project</text>
+  <text x="24" y="55" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="13" fill="${palette.text}">${escapeXml(repo)} - matches from the Superstars list</text>
+${rows}
+  <a href="${escapeXml(listUrl)}" target="_blank">
+    <text x="24" y="${height - 22}" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="12" fill="${palette.accent}">Superstars list: ${escapeXml(listRepo)}</text>
+  </a>
+  <text x="250" y="${height - 22}" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="12" fill="${palette.muted}">Checked ${escapeXml(formatNumber(checked))} superstars across ${escapeXml(formatNumber(scanned))} starred repos - ${escapeXml(formatDate(generatedAt))}</text>
+</svg>
+`;
+}
+
+function renderCompactBlurbsSuperstarsSvg({ repo, users, checked, scanned, generatedAt, palette }) {
+  const width = 760;
+  const horizontalPadding = 24;
+  const top = 76;
+  const itemHeight = 58;
+  const footerHeight = 44;
+  const columns = users.length > 2 ? 2 : 1;
+  const rowCount = Math.max(1, Math.ceil(Math.max(users.length, 1) / columns));
+  const columnWidth = (width - horizontalPadding * 2) / columns;
+  const height = top + rowCount * itemHeight + footerHeight;
+  const rows = users.length > 0
+    ? users
+        .map((user, index) => renderCompactBlurbItem(user, index, top, rowCount, columnWidth, horizontalPadding, itemHeight, palette))
+        .join("\n")
+    : `<text x="24" y="${top + 18}" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="14" fill="${palette.muted}">No notable matches found for this repository.</text>`;
+
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">Notable people who starred ${escapeXml(repo)}</title>
+  <desc id="desc">Compact list with blurbs of notable accounts from ${escapeXml(listRepo)} that starred this GitHub repository.</desc>
   <rect x="0.5" y="0.5" width="${width - 1}" height="${height - 1}" rx="10" fill="${palette.bg}" stroke="${palette.border}"/>
   <text x="24" y="32" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="19" font-weight="700" fill="${palette.title}">Notable people who starred this project</text>
   <text x="24" y="55" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="13" fill="${palette.text}">${escapeXml(repo)} - matches from the Superstars list</text>
@@ -492,6 +528,33 @@ function renderCompactSuperstarItem(user, index, top, rowCount, columnWidth, hor
   </a>`;
 }
 
+function renderCompactBlurbItem(user, index, top, rowCount, columnWidth, horizontalPadding, itemHeight, palette) {
+  const column = Math.floor(index / rowCount);
+  const row = index % rowCount;
+  const x = horizontalPadding + column * columnWidth;
+  const y = top + row * itemHeight;
+  const login = user.login || "unknown";
+  const displayName = user.name ? `${user.name} (@${login})` : `@${login}`;
+  const blurb = user.blurb || "Notable GitHub account";
+  const profileUrl = user.html_url || `https://github.com/${login}`;
+  const marker = user.avatar_data_url
+    ? `<defs>
+      <clipPath id="compact-blurb-avatar-${index}">
+        <circle cx="${x + 15}" cy="${y + 20}" r="14"/>
+      </clipPath>
+    </defs>
+    <image href="${escapeXml(user.avatar_data_url)}" x="${x + 1}" y="${y + 6}" width="28" height="28" preserveAspectRatio="xMidYMid slice" clip-path="url(#compact-blurb-avatar-${index})"/>
+    <circle cx="${x + 15}" cy="${y + 20}" r="14" fill="none" stroke="${palette.border}"/>`
+    : `<circle cx="${x + 15}" cy="${y + 20}" r="14" fill="${palette.chip}" stroke="${palette.border}"/>
+    <text x="${x + 15}" y="${y + 25}" text-anchor="middle" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="${palette.accent}">${escapeXml(login.slice(0, 1).toUpperCase())}</text>`;
+
+  return `  <a href="${escapeXml(profileUrl)}" target="_blank">
+    ${marker}
+    <text x="${x + 40}" y="${y + 16}" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="13" font-weight="700" fill="${palette.title}">${escapeXml(truncate(displayName, columnsTextLimit(columnWidth) - 1))}</text>
+    <text x="${x + 40}" y="${y + 37}" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="12" fill="${palette.text}">${escapeXml(truncate(blurb, columnsTextLimit(columnWidth) + 4))}</text>
+  </a>`;
+}
+
 function columnsTextLimit(columnWidth) {
   return Math.max(18, Math.floor((columnWidth - 42) / 7));
 }
@@ -535,11 +598,11 @@ function toPositiveInt(value, label) {
 }
 
 function normalizeFormat(value) {
-  if (value === "card" || value === "compact") {
+  if (value === "card" || value === "compact" || value === "compact-blurbs") {
     return value;
   }
 
-  throw new Error("--format must be card or compact");
+  throw new Error("--format must be card, compact, or compact-blurbs");
 }
 
 function formatNumber(value) {
@@ -577,7 +640,8 @@ Options:
   --batch-size number        Number of superstars to check in each GraphQL request. Default: 10
   --token token              GitHub token. Defaults to GITHUB_TOKEN or GH_TOKEN.
   --theme light|dark         SVG theme. Default: light
-  --format card|compact      Badge layout. Default: card
+  --format card|compact|compact-blurbs
+                              Badge layout. Default: card
   --demo                     Render a demo card without calling GitHub.
   --help                     Show this help.
 `);

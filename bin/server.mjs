@@ -176,7 +176,7 @@ limit=6
 maxStarredReposPerUser=1000
 batchSize=10
 theme=light|dark
-format=card|compact
+format=card|compact|compact-blurbs
 demo=1
 
 List:
@@ -371,6 +371,7 @@ function renderHomePage(request) {
           <select id="format">
             <option value="card">Card</option>
             <option value="compact">Compact</option>
+            <option value="compact-blurbs">Compact + blurbs</option>
           </select>
         </div>
         <button id="copyMarkdown">Copy Markdown</button>
@@ -439,8 +440,8 @@ function renderHomePage(request) {
         params.set("theme", "dark");
       }
 
-      if (format === "compact") {
-        params.set("format", "compact");
+      if (format !== "card") {
+        params.set("format", format);
       }
 
       const query = params.toString();
