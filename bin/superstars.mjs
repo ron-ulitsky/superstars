@@ -362,15 +362,15 @@ export function renderSuperstarsSvg({ repo, users, checked, scanned, maxStarredR
   const height = top + Math.max(users.length, 1) * rowHeight + footerHeight;
   const rows = users.length > 0
     ? users.map((user, index) => renderSuperstarRow(user, index, top + index * rowHeight, palette)).join("\n")
-    : `<text x="24" y="${top + 20}" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="14" fill="${palette.muted}">No superstars found among scanned starred repositories.</text>`;
+    : `<text x="24" y="${top + 20}" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="14" fill="${palette.muted}">No notable matches found for this repository.</text>`;
 
   return `<?xml version="1.0" encoding="UTF-8"?>
 <svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
-  <title id="title">Superstars for ${escapeXml(repo)}</title>
-  <desc id="desc">Curated notable accounts that starred this GitHub repository using ${escapeXml(listRepo)}.</desc>
+  <title id="title">Notable people who starred ${escapeXml(repo)}</title>
+  <desc id="desc">Notable accounts from ${escapeXml(listRepo)} that starred this GitHub repository.</desc>
   <rect x="0.5" y="0.5" width="${width - 1}" height="${height - 1}" rx="10" fill="${palette.bg}" stroke="${palette.border}"/>
-  <text x="24" y="34" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="20" font-weight="700" fill="${palette.title}">Superstars</text>
-  <text x="24" y="58" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="14" fill="${palette.text}">${escapeXml(repo)} - curated notable stargazers</text>
+  <text x="24" y="34" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="20" font-weight="700" fill="${palette.title}">Notable people who starred this project</text>
+  <text x="24" y="58" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="14" fill="${palette.text}">${escapeXml(repo)} - matches from the Superstars list</text>
   <rect x="578" y="22" width="158" height="28" rx="14" fill="${palette.chip}" stroke="${palette.border}"/>
   <text x="657" y="41" text-anchor="middle" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="12" font-weight="600" fill="${palette.accent}">${escapeXml(formatNumber(users.length))} found</text>
 ${rows}
@@ -388,14 +388,11 @@ function renderSuperstarRow(user, index, y, palette) {
   const displayName = user.name ? `${user.name} (@${login})` : `@${login}`;
   const blurb = user.blurb || "Notable GitHub account";
   const profileUrl = user.html_url || `https://github.com/${login}`;
-  const avatar = user.avatar_url
-    ? `<clipPath id="avatar-${index}"><circle cx="42" cy="${y + 25}" r="18"/></clipPath>
-  <image href="${escapeXml(user.avatar_url)}" x="24" y="${y + 7}" width="36" height="36" clip-path="url(#avatar-${index})"/>`
-    : `<circle cx="42" cy="${y + 25}" r="18" fill="${palette.chip}" stroke="${palette.border}"/>
+  const marker = `<circle cx="42" cy="${y + 25}" r="18" fill="${palette.chip}" stroke="${palette.border}"/>
   <text x="42" y="${y + 30}" text-anchor="middle" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="13" font-weight="700" fill="${palette.accent}">${escapeXml(login.slice(0, 1).toUpperCase())}</text>`;
 
   return `  <a href="${escapeXml(profileUrl)}" target="_blank">
-    ${avatar}
+    ${marker}
     <text x="76" y="${y + 20}" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="14" font-weight="700" fill="${palette.title}">${escapeXml(truncate(displayName, 52))}</text>
     <text x="76" y="${y + 41}" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="13" fill="${palette.text}">${escapeXml(truncate(blurb, 82))}</text>
   </a>`;

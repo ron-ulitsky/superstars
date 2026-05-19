@@ -1,6 +1,6 @@
 # Superstars
 
-Starproof's **Superstars** list is a curated set of prominent GitHub accounts. The pun is intentional: these are people whose star can act like a "super star" for a project.
+The **Superstars** list is a curated set of prominent GitHub accounts. The pun is intentional: these are people whose star can act like a "super star" for a project.
 
 The list is not meant to be objective, complete, or permanent. It should be useful, explainable, and easy to debate in public.
 

@@ -83,6 +83,33 @@ async function syncOneSuperstar(superstar) {
 
     for (const repo of profile.repos) {
       await client.query(
+        `INSERT INTO github_repos (
+           repo_full_name,
+           url,
+           description,
+           stargazer_count,
+           is_fork,
+           pushed_at,
+           updated_at
+         )
+         VALUES ($1, $2, $3, $4, $5, $6, NOW())
+         ON CONFLICT (repo_full_name) DO UPDATE SET
+           url = EXCLUDED.url,
+           description = EXCLUDED.description,
+           stargazer_count = EXCLUDED.stargazer_count,
+           is_fork = EXCLUDED.is_fork,
+           pushed_at = EXCLUDED.pushed_at,
+           updated_at = NOW()`,
+        [
+          repo.nameWithOwner,
+          repo.url,
+          repo.description,
+          repo.stargazerCount,
+          repo.isFork,
+          repo.pushedAt,
+        ],
+      );
+      await client.query(
         `INSERT INTO superstar_stars (login, repo_full_name, starred_at, discovered_at)
          VALUES ($1, $2, $3, NOW())
          ON CONFLICT (login, repo_full_name) DO UPDATE SET
@@ -133,6 +160,11 @@ async function fetchAllStarredRepos(login) {
               starredAt
               node {
                 nameWithOwner
+                url
+                description
+                stargazerCount
+                isFork
+                pushedAt
               }
             }
             pageInfo {
@@ -153,6 +185,11 @@ async function fetchAllStarredRepos(login) {
     profile = user;
     repos.push(...user.starredRepositories.edges.map((edge) => ({
       nameWithOwner: edge.node.nameWithOwner,
+      url: edge.node.url,
+      description: edge.node.description,
+      stargazerCount: edge.node.stargazerCount,
+      isFork: edge.node.isFork,
+      pushedAt: edge.node.pushedAt,
       starredAt: edge.starredAt,
     })));
 

@@ -5,34 +5,19 @@
     "blurb": "Creator of Linux and Git"
   },
   {
-    "login": "gaearon",
-    "name": "Dan Abramov",
-    "blurb": "React core alum and educator"
+    "login": "gvanrossum",
+    "name": "Guido van Rossum",
+    "blurb": "Creator of Python"
   },
   {
-    "login": "sindresorhus",
-    "name": "Sindre Sorhus",
-    "blurb": "Prolific open source maintainer"
+    "login": "matz",
+    "name": "Yukihiro Matsumoto",
+    "blurb": "Creator of Ruby"
   },
   {
-    "login": "yyx990803",
-    "name": "Evan You",
-    "blurb": "Creator of Vue and Vite"
-  },
-  {
-    "login": "addyosmani",
-    "name": "Addy Osmani",
-    "blurb": "Web performance and Chrome engineering leader"
-  },
-  {
-    "login": "karpathy",
-    "name": "Andrej Karpathy",
-    "blurb": "AI educator and neural networks researcher"
-  },
-  {
-    "login": "paulg",
-    "name": "Paul Graham",
-    "blurb": "Programmer, essayist, and startup investor"
+    "login": "brendaneich",
+    "name": "Brendan Eich",
+    "blurb": "Creator of JavaScript"
   },
   {
     "login": "dhh",
@@ -40,9 +25,49 @@
     "blurb": "Creator of Ruby on Rails"
   },
   {
-    "login": "tj",
-    "name": "TJ Holowaychuk",
-    "blurb": "Influential Node.js and Go open source author"
+    "login": "yyx990803",
+    "name": "Evan You",
+    "blurb": "Creator of Vue and Vite"
+  },
+  {
+    "login": "Rich-Harris",
+    "name": "Rich Harris",
+    "blurb": "Creator of Svelte"
+  },
+  {
+    "login": "gaearon",
+    "name": "Dan Abramov",
+    "blurb": "React core alum and educator"
+  },
+  {
+    "login": "sophiebits",
+    "name": "Sophie Alpert",
+    "blurb": "Former React lead"
+  },
+  {
+    "login": "sebmarkbage",
+    "name": "Sebastian Markbage",
+    "blurb": "React core team engineer"
+  },
+  {
+    "login": "acdlite",
+    "name": "Andrew Clark",
+    "blurb": "React core team engineer"
+  },
+  {
+    "login": "bvaughn",
+    "name": "Brian Vaughn",
+    "blurb": "React DevTools and performance tooling author"
+  },
+  {
+    "login": "mjackson",
+    "name": "Michael Jackson",
+    "blurb": "React Router and Remix co-creator"
+  },
+  {
+    "login": "ryanflorence",
+    "name": "Ryan Florence",
+    "blurb": "React Router and Remix co-creator"
   },
   {
     "login": "kentcdodds",
@@ -50,14 +75,119 @@
     "blurb": "JavaScript educator and testing advocate"
   },
   {
-    "login": "rauchg",
-    "name": "Guillermo Rauch",
-    "blurb": "Vercel CEO and Next.js ecosystem builder"
+    "login": "getify",
+    "name": "Kyle Simpson",
+    "blurb": "JavaScript author and educator"
   },
   {
-    "login": "matz",
-    "name": "Yukihiro Matsumoto",
-    "blurb": "Creator of Ruby"
+    "login": "wesbos",
+    "name": "Wes Bos",
+    "blurb": "JavaScript educator"
+  },
+  {
+    "login": "cassidoo",
+    "name": "Cassidy Williams",
+    "blurb": "Developer educator and community builder"
+  },
+  {
+    "login": "swyxio",
+    "name": "Shawn Wang",
+    "blurb": "Developer writer and AI engineering educator"
+  },
+  {
+    "login": "addyosmani",
+    "name": "Addy Osmani",
+    "blurb": "Web performance and Chrome engineering leader"
+  },
+  {
+    "login": "paulirish",
+    "name": "Paul Irish",
+    "blurb": "Chrome DevTools and web performance engineer"
+  },
+  {
+    "login": "mathiasbynens",
+    "name": "Mathias Bynens",
+    "blurb": "JavaScript and web platform engineer"
+  },
+  {
+    "login": "domenic",
+    "name": "Domenic Denicola",
+    "blurb": "Web standards engineer"
+  },
+  {
+    "login": "jeresig",
+    "name": "John Resig",
+    "blurb": "Creator of jQuery"
+  },
+  {
+    "login": "antfu",
+    "name": "Anthony Fu",
+    "blurb": "Vite, Vue, and open source tooling maintainer"
+  },
+  {
+    "login": "egoist",
+    "name": "EGOIST",
+    "blurb": "JavaScript tooling author"
+  },
+  {
+    "login": "developit",
+    "name": "Jason Miller",
+    "blurb": "Creator of Preact"
+  },
+  {
+    "login": "evanw",
+    "name": "Evan Wallace",
+    "blurb": "Creator of esbuild"
+  },
+  {
+    "login": "sindresorhus",
+    "name": "Sindre Sorhus",
+    "blurb": "Prolific open source maintainer"
+  },
+  {
+    "login": "tj",
+    "name": "TJ Holowaychuk",
+    "blurb": "Influential Node.js and Go open source author"
+  },
+  {
+    "login": "isaacs",
+    "name": "Isaac Z. Schlueter",
+    "blurb": "npm creator and Node.js maintainer"
+  },
+  {
+    "login": "dominictarr",
+    "name": "Dominic Tarr",
+    "blurb": "Influential Node.js and distributed systems author"
+  },
+  {
+    "login": "mafintosh",
+    "name": "Mathias Buus",
+    "blurb": "Node.js and peer-to-peer systems maintainer"
+  },
+  {
+    "login": "feross",
+    "name": "Feross Aboukhadijeh",
+    "blurb": "WebTorrent creator and JavaScript maintainer"
+  },
+  {
+    "login": "mdo",
+    "name": "Mark Otto",
+    "blurb": "Bootstrap co-creator"
+  },
+  {
+    "login": "fat",
+    "name": "Jacob Thornton",
+    "blurb": "Bootstrap co-creator"
+  },
+  {
+    "login": "fabpot",
+    "name": "Fabien Potencier",
+    "blurb": "Symfony creator"
+  },
+  {
+    "login": "taylorotwell",
+    "name": "Taylor Otwell",
+    "blurb": "Laravel creator"
   },
   {
     "login": "mitsuhiko",
@@ -70,8 +200,53 @@
     "blurb": "Creator of Redis"
   },
   {
+    "login": "hadley",
+    "name": "Hadley Wickham",
+    "blurb": "Tidyverse creator and data science tooling author"
+  },
+  {
+    "login": "karpathy",
+    "name": "Andrej Karpathy",
+    "blurb": "AI educator and neural networks researcher"
+  },
+  {
+    "login": "sama",
+    "name": "Sam Altman",
+    "blurb": "OpenAI CEO and startup investor"
+  },
+  {
+    "login": "natfriedman",
+    "name": "Nat Friedman",
+    "blurb": "Former GitHub CEO and developer tools investor"
+  },
+  {
+    "login": "paulg",
+    "name": "Paul Graham",
+    "blurb": "Programmer, essayist, and startup investor"
+  },
+  {
+    "login": "shanselman",
+    "name": "Scott Hanselman",
+    "blurb": "Developer educator and Microsoft engineer"
+  },
+  {
+    "login": "wycats",
+    "name": "Yehuda Katz",
+    "blurb": "Ruby, Rails, Ember, and Rust contributor"
+  },
+  {
+    "login": "mojombo",
+    "name": "Tom Preston-Werner",
+    "blurb": "GitHub co-founder and TOML creator"
+  },
+  {
     "login": "defunkt",
     "name": "Chris Wanstrath",
     "blurb": "GitHub co-founder"
+  },
+  {
+    "login": "rauchg",
+    "name": "Guillermo Rauch",
+    "blurb": "Vercel CEO and Next.js ecosystem builder"
   }
 ]

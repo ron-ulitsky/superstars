@@ -35,6 +35,20 @@ limit=6
 theme=light|dark
 ```
 
+## Try It On Your Repo
+
+Replace `owner/repo` with your repository:
+
+```text
+https://superstars.onrender.com/owner/repo.svg
+```
+
+Then paste it into Markdown:
+
+```md
+![Notable people who starred this project](https://superstars.onrender.com/owner/repo.svg)
+```
+
 The badge displays matching accounts from the Superstars list and includes a footer pointing back to the list source:
 
 ```text
@@ -57,6 +71,8 @@ See [`SUPERSTARS.md`](./SUPERSTARS.md) to suggest additions, removals, better bl
 
 ## Notes
 
-Superstar badges may include profile links and avatar images in the raw SVG. In GitHub README Markdown, SVGs are embedded as images, so internal links are usually not clickable and external avatar images may depend on the renderer. The text-only fallback remains the important part.
+Superstar badges may include profile links in the raw SVG. In GitHub README Markdown, SVGs are embedded as images, so internal links are usually not clickable. The text is the important part.
 
 Operational details for running the service, syncing the index, and deploying with Render/Neon live in [`docs/operations.md`](./docs/operations.md).
+
+See [`EXAMPLES.md`](./EXAMPLES.md) for sample badges on well-known repositories.
