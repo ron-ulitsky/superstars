@@ -13,6 +13,7 @@ WITH superstar_matches AS (
     STRING_AGG(s.login, ', ' ORDER BY s.list_rank) AS superstars
   FROM superstar_stars ss
   JOIN superstars s ON s.login = ss.login
+  WHERE lower(split_part(ss.repo_full_name, '/', 1)) <> lower(s.login)
   GROUP BY ss.repo_full_name
 )
 SELECT
@@ -53,7 +54,7 @@ function renderMarkdown(rows) {
 
   return `# Underrated Repos Noticed by Superstars
 
-Recently active, non-fork repositories with the fewest GitHub stars that have still been starred by at least one account on the Superstars list.
+Recently active, non-fork repositories with the fewest GitHub stars that have still been starred by at least one account on the Superstars list, excluding self-stars.
 
 Generated from the indexed database on ${generatedAt}.
 
@@ -78,6 +79,7 @@ WITH superstar_matches AS (
     STRING_AGG(s.login, ', ' ORDER BY s.list_rank) AS superstars
   FROM superstar_stars ss
   JOIN superstars s ON s.login = ss.login
+  WHERE lower(split_part(ss.repo_full_name, '/', 1)) <> lower(s.login)
   GROUP BY ss.repo_full_name
   HAVING COUNT(*) >= 2
 )
