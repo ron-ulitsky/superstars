@@ -54,10 +54,11 @@ export async function buildSuperstarsSvg(input) {
   const result = options.demo
     ? buildDemoResult(superstars)
     : await findSuperstarMatches(repo, superstars, options);
+  const users = await hydrateAvatarDataUrls(result.matches.slice(0, options.limit));
 
   return renderSuperstarsSvg({
     repo: `${repo.owner}/${repo.name}`,
-    users: result.matches.slice(0, options.limit),
+    users,
     checked: result.checked || superstars.length,
     scanned: result.scanned,
     maxStarredReposPerUser: options.demo ? demoUsers.length : options.maxStarredReposPerUser,
@@ -175,6 +176,41 @@ function buildDemoResult(superstars) {
   }
 
   return { matches, scanned: demoUsers.length };
+}
+
+async function hydrateAvatarDataUrls(users) {
+  return Promise.all(users.map(async (user) => {
+    if (!user.avatar_url) {
+      return user;
+    }
+
+    try {
+      return {
+        ...user,
+        avatar_data_url: await fetchAvatarDataUrl(user.avatar_url),
+      };
+    } catch {
+      return user;
+    }
+  }));
+}
+
+async function fetchAvatarDataUrl(url) {
+  const response = await fetch(url, {
+    headers: {
+      Accept: "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8",
+      "User-Agent": "superstars",
+    },
+    signal: AbortSignal.timeout(5000),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Avatar fetch ${response.status}`);
+  }
+
+  const contentType = response.headers.get("content-type")?.split(";")[0] || "image/png";
+  const buffer = Buffer.from(await response.arrayBuffer());
+  return `data:${contentType};base64,${buffer.toString("base64")}`;
 }
 
 export async function findSuperstarMatches(repo, superstars, options) {
@@ -388,7 +424,16 @@ function renderSuperstarRow(user, index, y, palette) {
   const displayName = user.name ? `${user.name} (@${login})` : `@${login}`;
   const blurb = user.blurb || "Notable GitHub account";
   const profileUrl = user.html_url || `https://github.com/${login}`;
-  const marker = `<circle cx="42" cy="${y + 25}" r="18" fill="${palette.chip}" stroke="${palette.border}"/>
+  const marker = user.avatar_data_url
+    ? `<defs>
+      <clipPath id="avatar-${index}">
+        <circle cx="42" cy="${y + 25}" r="18"/>
+      </clipPath>
+    </defs>
+    <circle cx="42" cy="${y + 25}" r="18" fill="${palette.chip}" stroke="${palette.border}"/>
+    <image href="${escapeXml(user.avatar_data_url)}" x="24" y="${y + 7}" width="36" height="36" preserveAspectRatio="xMidYMid slice" clip-path="url(#avatar-${index})"/>
+    <circle cx="42" cy="${y + 25}" r="18" fill="none" stroke="${palette.border}"/>`
+    : `<circle cx="42" cy="${y + 25}" r="18" fill="${palette.chip}" stroke="${palette.border}"/>
   <text x="42" y="${y + 30}" text-anchor="middle" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="13" font-weight="700" fill="${palette.accent}">${escapeXml(login.slice(0, 1).toUpperCase())}</text>`;
 
   return `  <a href="${escapeXml(profileUrl)}" target="_blank">

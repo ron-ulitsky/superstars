@@ -65,7 +65,7 @@ See [`SUPERSTARS.md`](./SUPERSTARS.md) to suggest additions, removals, better bl
 
 ## Notes
 
-Superstar badges may include profile links in the raw SVG. In GitHub README Markdown, SVGs are embedded as images, so internal links are usually not clickable. The text is the important part.
+Superstar badges embed small avatar snapshots directly in the SVG, with initials as a fallback if an avatar cannot be fetched. Profile links may exist in the raw SVG, but GitHub README Markdown embeds SVGs as images, so internal links are usually not clickable.
 
 Operational details for running the service, syncing the index, and deploying with Render/Neon live in [`docs/operations.md`](./docs/operations.md).
 
