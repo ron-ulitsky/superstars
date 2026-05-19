@@ -22,9 +22,9 @@ The badge displays matching accounts from the Superstars list and includes a foo
 Superstars list: ron-ulitsky/superstars
 ```
 
-## Usage
+## Manual Usage
 
-Add this to a README:
+If you prefer to build the URL yourself instead of using the generator, add this to a README:
 
 ```md
 ![Superstars](https://superstars.onrender.com/owner/repo.svg)
