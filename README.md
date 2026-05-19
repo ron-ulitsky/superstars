@@ -28,11 +28,18 @@ With options:
 ![Superstars](https://superstars.onrender.com/facebook/react.svg?limit=8&theme=dark)
 ```
 
+Compact format:
+
+```md
+![Superstars](https://superstars.onrender.com/facebook/react.svg?format=compact)
+```
+
 Supported URL options:
 
 ```text
 limit=6
 theme=light|dark
+format=card|compact
 ```
 
 ## Try It On Your Repo

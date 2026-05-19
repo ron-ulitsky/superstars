@@ -10,6 +10,7 @@ export const DEFAULTS = {
   batchSize: 10,
   output: "superstars.svg",
   theme: "light",
+  format: "card",
 };
 
 const superstarsPath = new URL("../data/superstars.json", import.meta.url);
@@ -65,6 +66,7 @@ export async function buildSuperstarsSvg(input) {
     indexed: Boolean(result.indexed),
     generatedAt: new Date(),
     theme: options.theme,
+    format: options.format,
   });
 }
 
@@ -84,6 +86,7 @@ export function normalizeOptions(input = {}) {
       "max-starred-repos-per-user",
     ),
     batchSize: toPositiveInt(input.batchSize ?? DEFAULTS.batchSize, "batch-size"),
+    format: normalizeFormat(input.format ?? DEFAULTS.format),
   };
 }
 
@@ -125,6 +128,9 @@ export function parseArgs(args) {
         break;
       case "--theme":
         options.theme = readValue();
+        break;
+      case "--format":
+        options.format = readValue();
         break;
       case "--demo":
         options.demo = true;
@@ -370,26 +376,12 @@ async function githubGraphql(query, variables, options) {
   return payload.data;
 }
 
-export function renderSuperstarsSvg({ repo, users, checked, scanned, maxStarredReposPerUser, indexed, generatedAt, theme }) {
-  const palette = theme === "dark"
-    ? {
-        bg: "#0d1117",
-        border: "#30363d",
-        title: "#f0f6fc",
-        text: "#c9d1d9",
-        muted: "#8b949e",
-        accent: "#f2cc60",
-        chip: "#161b22",
-      }
-    : {
-        bg: "#ffffff",
-        border: "#d0d7de",
-        title: "#24292f",
-        text: "#57606a",
-        muted: "#6e7781",
-        accent: "#9a6700",
-        chip: "#fff8c5",
-      };
+export function renderSuperstarsSvg({ repo, users, checked, scanned, maxStarredReposPerUser, indexed, generatedAt, theme, format }) {
+  const palette = getPalette(theme);
+
+  if (format === "compact") {
+    return renderCompactSuperstarsSvg({ repo, users, checked, scanned, generatedAt, palette });
+  }
 
   const width = 760;
   const rowHeight = 58;
@@ -419,6 +411,38 @@ ${rows}
 `;
 }
 
+function renderCompactSuperstarsSvg({ repo, users, checked, scanned, generatedAt, palette }) {
+  const width = 760;
+  const horizontalPadding = 24;
+  const top = 76;
+  const itemHeight = 38;
+  const footerHeight = 44;
+  const columns = users.length > 8 ? 3 : users.length > 3 ? 2 : 1;
+  const rowCount = Math.max(1, Math.ceil(Math.max(users.length, 1) / columns));
+  const columnWidth = (width - horizontalPadding * 2) / columns;
+  const height = top + rowCount * itemHeight + footerHeight;
+  const rows = users.length > 0
+    ? users
+        .map((user, index) => renderCompactSuperstarItem(user, index, top, rowCount, columnWidth, horizontalPadding, itemHeight, palette))
+        .join("\n")
+    : `<text x="24" y="${top + 18}" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="14" fill="${palette.muted}">No notable matches found for this repository.</text>`;
+
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">Notable people who starred ${escapeXml(repo)}</title>
+  <desc id="desc">Compact list of notable accounts from ${escapeXml(listRepo)} that starred this GitHub repository.</desc>
+  <rect x="0.5" y="0.5" width="${width - 1}" height="${height - 1}" rx="10" fill="${palette.bg}" stroke="${palette.border}"/>
+  <text x="24" y="32" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="19" font-weight="700" fill="${palette.title}">Notable people who starred this project</text>
+  <text x="24" y="55" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="13" fill="${palette.text}">${escapeXml(repo)} - matches from the Superstars list</text>
+${rows}
+  <a href="${escapeXml(listUrl)}" target="_blank">
+    <text x="24" y="${height - 22}" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="12" fill="${palette.accent}">Superstars list: ${escapeXml(listRepo)}</text>
+  </a>
+  <text x="250" y="${height - 22}" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="12" fill="${palette.muted}">Checked ${escapeXml(formatNumber(checked))} superstars across ${escapeXml(formatNumber(scanned))} starred repos - ${escapeXml(formatDate(generatedAt))}</text>
+</svg>
+`;
+}
+
 function renderSuperstarRow(user, index, y, palette) {
   const login = user.login || "unknown";
   const displayName = user.name ? `${user.name} (@${login})` : `@${login}`;
@@ -443,6 +467,57 @@ function renderSuperstarRow(user, index, y, palette) {
   </a>`;
 }
 
+function renderCompactSuperstarItem(user, index, top, rowCount, columnWidth, horizontalPadding, itemHeight, palette) {
+  const column = Math.floor(index / rowCount);
+  const row = index % rowCount;
+  const x = horizontalPadding + column * columnWidth;
+  const y = top + row * itemHeight;
+  const login = user.login || "unknown";
+  const displayName = user.name ? `${user.name} (@${login})` : `@${login}`;
+  const profileUrl = user.html_url || `https://github.com/${login}`;
+  const marker = user.avatar_data_url
+    ? `<defs>
+      <clipPath id="compact-avatar-${index}">
+        <circle cx="${x + 13}" cy="${y + 14}" r="12"/>
+      </clipPath>
+    </defs>
+    <image href="${escapeXml(user.avatar_data_url)}" x="${x + 1}" y="${y + 2}" width="24" height="24" preserveAspectRatio="xMidYMid slice" clip-path="url(#compact-avatar-${index})"/>
+    <circle cx="${x + 13}" cy="${y + 14}" r="12" fill="none" stroke="${palette.border}"/>`
+    : `<circle cx="${x + 13}" cy="${y + 14}" r="12" fill="${palette.chip}" stroke="${palette.border}"/>
+    <text x="${x + 13}" y="${y + 18}" text-anchor="middle" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="10" font-weight="700" fill="${palette.accent}">${escapeXml(login.slice(0, 1).toUpperCase())}</text>`;
+
+  return `  <a href="${escapeXml(profileUrl)}" target="_blank">
+    ${marker}
+    <text x="${x + 34}" y="${y + 19}" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="13" font-weight="700" fill="${palette.title}">${escapeXml(truncate(displayName, columnsTextLimit(columnWidth)))}</text>
+  </a>`;
+}
+
+function columnsTextLimit(columnWidth) {
+  return Math.max(18, Math.floor((columnWidth - 42) / 7));
+}
+
+function getPalette(theme) {
+  return theme === "dark"
+    ? {
+        bg: "#0d1117",
+        border: "#30363d",
+        title: "#f0f6fc",
+        text: "#c9d1d9",
+        muted: "#8b949e",
+        accent: "#f2cc60",
+        chip: "#161b22",
+      }
+    : {
+        bg: "#ffffff",
+        border: "#d0d7de",
+        title: "#24292f",
+        text: "#57606a",
+        muted: "#6e7781",
+        accent: "#9a6700",
+        chip: "#fff8c5",
+      };
+}
+
 function toNonNegativeInt(value, label) {
   const parsed = Number.parseInt(value, 10);
   if (!Number.isFinite(parsed) || parsed < 0) {
@@ -457,6 +532,14 @@ function toPositiveInt(value, label) {
     throw new Error(`--${label} must be a positive integer`);
   }
   return parsed;
+}
+
+function normalizeFormat(value) {
+  if (value === "card" || value === "compact") {
+    return value;
+  }
+
+  throw new Error("--format must be card or compact");
 }
 
 function formatNumber(value) {
@@ -494,6 +577,7 @@ Options:
   --batch-size number        Number of superstars to check in each GraphQL request. Default: 10
   --token token              GitHub token. Defaults to GITHUB_TOKEN or GH_TOKEN.
   --theme light|dark         SVG theme. Default: light
+  --format card|compact      Badge layout. Default: card
   --demo                     Render a demo card without calling GitHub.
   --help                     Show this help.
 `);

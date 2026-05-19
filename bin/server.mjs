@@ -93,6 +93,7 @@ function optionsFromSearchParams(searchParams) {
     ),
     batchSize: readInt(searchParams, "batchSize", readInt(searchParams, "batch_size", DEFAULTS.batchSize)),
     theme: searchParams.get("theme") || DEFAULTS.theme,
+    format: searchParams.get("format") || searchParams.get("layout") || DEFAULTS.format,
     demo: readBool(searchParams, "demo"),
   };
 }
@@ -175,6 +176,7 @@ limit=6
 maxStarredReposPerUser=1000
 batchSize=10
 theme=light|dark
+format=card|compact
 demo=1
 
 List:
@@ -364,6 +366,13 @@ function renderHomePage(request) {
             <option value="dark">Dark</option>
           </select>
         </div>
+        <div>
+          <label for="format">Format</label>
+          <select id="format">
+            <option value="card">Card</option>
+            <option value="compact">Compact</option>
+          </select>
+        </div>
         <button id="copyMarkdown">Copy Markdown</button>
       </div>
 
@@ -406,6 +415,7 @@ function renderHomePage(request) {
     const origin = ${JSON.stringify(origin)};
     const repoInput = document.querySelector("#repo");
     const themeInput = document.querySelector("#theme");
+    const formatInput = document.querySelector("#format");
     const markdown = document.querySelector("#markdown");
     const url = document.querySelector("#url");
     const preview = document.querySelector("#preview");
@@ -422,8 +432,19 @@ function renderHomePage(request) {
     function update() {
       const repo = normalizeRepo(repoInput.value) || "owner/repo";
       const theme = themeInput.value;
-      const params = theme === "dark" ? "?theme=dark" : "";
-      const imageUrl = origin + "/" + repo + ".svg" + params;
+      const format = formatInput.value;
+      const params = new URLSearchParams();
+
+      if (theme === "dark") {
+        params.set("theme", "dark");
+      }
+
+      if (format === "compact") {
+        params.set("format", "compact");
+      }
+
+      const query = params.toString();
+      const imageUrl = origin + "/" + repo + ".svg" + (query ? "?" + query : "");
       const markdownValue = "![Notable people who starred this project](" + imageUrl + ")";
 
       url.value = imageUrl;
@@ -442,6 +463,7 @@ function renderHomePage(request) {
 
     repoInput.addEventListener("input", update);
     themeInput.addEventListener("change", update);
+    formatInput.addEventListener("change", update);
     document.querySelector("#copyMarkdown").addEventListener("click", () => copy(markdown.value, "Markdown"));
     document.querySelector("#copyMarkdown2").addEventListener("click", () => copy(markdown.value, "Markdown"));
     document.querySelector("#copyUrl").addEventListener("click", () => copy(url.value, "URL"));
