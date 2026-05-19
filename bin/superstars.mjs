@@ -389,7 +389,7 @@ export function renderSuperstarsSvg({ repo, users, checked, scanned, maxStarredR
 
   const width = 760;
   const rowHeight = 58;
-  const top = 88;
+  const top = 64;
   const footerHeight = 66;
   const height = top + Math.max(users.length, 1) * rowHeight + footerHeight;
   const rows = users.length > 0
@@ -402,7 +402,6 @@ export function renderSuperstarsSvg({ repo, users, checked, scanned, maxStarredR
   <desc id="desc">Notable accounts from ${escapeXml(listRepo)} that starred this GitHub repository.</desc>
   <rect x="0.5" y="0.5" width="${width - 1}" height="${height - 1}" rx="10" fill="${palette.bg}" stroke="${palette.border}"/>
   <text x="24" y="34" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="20" font-weight="700" fill="${palette.title}">Notable people who starred this project</text>
-  <text x="24" y="58" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="14" fill="${palette.text}">${escapeXml(repo)} - matches from the Superstars list</text>
   <rect x="578" y="22" width="158" height="28" rx="14" fill="${palette.chip}" stroke="${palette.border}"/>
   <text x="657" y="41" text-anchor="middle" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="12" font-weight="600" fill="${palette.accent}">${escapeXml(formatNumber(users.length))} found</text>
 ${rows}
@@ -418,7 +417,7 @@ ${rows}
 function renderCompactSuperstarsSvg({ repo, users, checked, scanned, generatedAt, palette }) {
   const width = 760;
   const horizontalPadding = 24;
-  const top = 76;
+  const top = 54;
   const itemHeight = 38;
   const footerHeight = 44;
   const columns = users.length > 8 ? 3 : users.length > 3 ? 2 : 1;
@@ -437,7 +436,6 @@ function renderCompactSuperstarsSvg({ repo, users, checked, scanned, generatedAt
   <desc id="desc">Compact list of notable accounts from ${escapeXml(listRepo)} that starred this GitHub repository.</desc>
   <rect x="0.5" y="0.5" width="${width - 1}" height="${height - 1}" rx="10" fill="${palette.bg}" stroke="${palette.border}"/>
   <text x="24" y="32" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="19" font-weight="700" fill="${palette.title}">Notable people who starred this project</text>
-  <text x="24" y="55" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="13" fill="${palette.text}">${escapeXml(repo)} - matches from the Superstars list</text>
 ${rows}
   <a href="${escapeXml(listUrl)}" target="_blank">
     <text x="24" y="${height - 22}" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="12" fill="${palette.accent}">Superstars list: ${escapeXml(listRepo)}</text>
@@ -450,7 +448,7 @@ ${rows}
 function renderCompactBlurbsSuperstarsSvg({ repo, users, checked, scanned, generatedAt, palette }) {
   const width = 760;
   const horizontalPadding = 24;
-  const top = 76;
+  const top = 54;
   const itemHeight = 58;
   const footerHeight = 44;
   const columns = users.length > 2 ? 2 : 1;
@@ -469,7 +467,6 @@ function renderCompactBlurbsSuperstarsSvg({ repo, users, checked, scanned, gener
   <desc id="desc">Compact list with blurbs of notable accounts from ${escapeXml(listRepo)} that starred this GitHub repository.</desc>
   <rect x="0.5" y="0.5" width="${width - 1}" height="${height - 1}" rx="10" fill="${palette.bg}" stroke="${palette.border}"/>
   <text x="24" y="32" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="19" font-weight="700" fill="${palette.title}">Notable people who starred this project</text>
-  <text x="24" y="55" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="13" fill="${palette.text}">${escapeXml(repo)} - matches from the Superstars list</text>
 ${rows}
   <a href="${escapeXml(listUrl)}" target="_blank">
     <text x="24" y="${height - 22}" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="12" fill="${palette.accent}">Superstars list: ${escapeXml(listRepo)}</text>
