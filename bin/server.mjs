@@ -369,9 +369,9 @@ function renderHomePage(request) {
         <div>
           <label for="format">Format</label>
           <select id="format">
+            <option value="compact-blurbs">Compact + blurbs</option>
             <option value="card">Card</option>
             <option value="compact">Compact</option>
-            <option value="compact-blurbs">Compact + blurbs</option>
           </select>
         </div>
         <button id="copyMarkdown">Copy Markdown</button>
@@ -440,7 +440,7 @@ function renderHomePage(request) {
         params.set("theme", "dark");
       }
 
-      if (format !== "card") {
+      if (format !== "compact-blurbs") {
         params.set("format", format);
       }
 

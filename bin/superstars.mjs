@@ -10,7 +10,7 @@ export const DEFAULTS = {
   batchSize: 10,
   output: "superstars.svg",
   theme: "light",
-  format: "card",
+  format: "compact-blurbs",
 };
 
 const superstarsPath = new URL("../data/superstars.json", import.meta.url);
@@ -656,7 +656,7 @@ Options:
   --token token              GitHub token. Defaults to GITHUB_TOKEN or GH_TOKEN.
   --theme light|dark         SVG theme. Default: light
   --format card|compact|compact-blurbs
-                              Badge layout. Default: card
+                              Badge layout. Default: compact-blurbs
   --demo                     Render a demo card without calling GitHub.
   --help                     Show this help.
 `);

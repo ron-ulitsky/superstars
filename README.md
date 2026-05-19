@@ -28,16 +28,16 @@ With options:
 ![Superstars](https://superstars.onrender.com/facebook/react.svg?limit=8&theme=dark)
 ```
 
-Compact format:
+Full card format:
+
+```md
+![Superstars](https://superstars.onrender.com/facebook/react.svg?format=card)
+```
+
+Names-only compact format:
 
 ```md
 ![Superstars](https://superstars.onrender.com/facebook/react.svg?format=compact)
-```
-
-Compact format with blurbs:
-
-```md
-![Superstars](https://superstars.onrender.com/facebook/react.svg?format=compact-blurbs)
 ```
 
 Supported URL options:
@@ -45,7 +45,7 @@ Supported URL options:
 ```text
 limit=6
 theme=light|dark
-format=card|compact|compact-blurbs
+format=compact-blurbs|card|compact
 ```
 
 ## Try It On Your Repo
