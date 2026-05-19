@@ -16,7 +16,12 @@ const server = createServer(async (request, response) => {
       return;
     }
 
-    if (url.pathname === "/" || url.pathname === "/health") {
+    if (url.pathname === "/") {
+      sendHtml(response, renderHomePage(request));
+      return;
+    }
+
+    if (url.pathname === "/health") {
       sendText(response, 200, usageText(request));
       return;
     }
@@ -147,6 +152,14 @@ function sendText(response, status, body) {
   response.end(body);
 }
 
+function sendHtml(response, body) {
+  response.writeHead(200, {
+    "Content-Type": "text/html; charset=utf-8",
+    "Cache-Control": "public, max-age=300",
+  });
+  response.end(body);
+}
+
 function usageText(request) {
   const host = request.headers.host || "localhost:3000";
   return `Superstars
@@ -167,6 +180,275 @@ demo=1
 List:
 https://github.com/ron-ulitsky/superstars
 `;
+}
+
+function renderHomePage(request) {
+  const host = request.headers.host || "localhost:3000";
+  const forwardedProtocol = request.headers["x-forwarded-proto"];
+  const protocol =
+    typeof forwardedProtocol === "string"
+      ? forwardedProtocol
+      : host.startsWith("localhost") || host.startsWith("127.0.0.1")
+        ? "http"
+        : "https";
+  const origin = `${protocol}://${host}`;
+
+  return `<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Superstars</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f6f8fa;
+      --panel: #ffffff;
+      --text: #24292f;
+      --muted: #57606a;
+      --border: #d0d7de;
+      --accent: #9a6700;
+      --accent-bg: #fff8c5;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+      line-height: 1.5;
+    }
+
+    main {
+      width: min(960px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 56px 0;
+    }
+
+    h1 {
+      margin: 0 0 12px;
+      font-size: clamp(32px, 5vw, 56px);
+      line-height: 1.05;
+      letter-spacing: 0;
+    }
+
+    .lede {
+      max-width: 720px;
+      margin: 0 0 28px;
+      color: var(--muted);
+      font-size: 18px;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 20px;
+      margin: 20px 0;
+    }
+
+    label {
+      display: block;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .controls {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto auto;
+      gap: 10px;
+      align-items: end;
+    }
+
+    input, select, button, textarea {
+      font: inherit;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 10px 12px;
+      background: #fff;
+      color: var(--text);
+    }
+
+    button {
+      border: 1px solid #7d5f00;
+      border-radius: 6px;
+      padding: 10px 14px;
+      background: var(--accent);
+      color: #fff;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    button.secondary {
+      background: var(--accent-bg);
+      color: var(--accent);
+      border-color: #d4a72c;
+    }
+
+    .output {
+      display: grid;
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .preview {
+      overflow-x: auto;
+      padding: 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: #fff;
+    }
+
+    .preview img {
+      max-width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    .copy-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 10px;
+    }
+
+    .hint, .status {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      margin-top: 22px;
+    }
+
+    a {
+      color: #0969da;
+      text-decoration: none;
+    }
+
+    a:hover { text-decoration: underline; }
+
+    @media (max-width: 720px) {
+      main { padding: 32px 0; }
+      .controls, .copy-row { grid-template-columns: 1fr; }
+      button { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Superstars</h1>
+    <p class="lede">Generate a README badge showing notable people who starred a GitHub repository.</p>
+
+    <section class="panel" aria-labelledby="try-heading">
+      <h2 id="try-heading">Try It On Your Repo</h2>
+      <div class="controls">
+        <div>
+          <label for="repo">Repository</label>
+          <input id="repo" value="facebook/react" placeholder="owner/repo" autocomplete="off" spellcheck="false">
+        </div>
+        <div>
+          <label for="theme">Theme</label>
+          <select id="theme">
+            <option value="light">Light</option>
+            <option value="dark">Dark</option>
+          </select>
+        </div>
+        <button id="copyMarkdown">Copy Markdown</button>
+      </div>
+
+      <div class="output">
+        <div>
+          <label for="markdown">Markdown</label>
+          <div class="copy-row">
+            <textarea id="markdown" rows="2" readonly></textarea>
+            <button class="secondary" id="copyMarkdown2">Copy</button>
+          </div>
+        </div>
+
+        <div>
+          <label for="url">Image URL</label>
+          <div class="copy-row">
+            <input id="url" readonly>
+            <button class="secondary" id="copyUrl">Copy</button>
+          </div>
+        </div>
+
+        <div class="preview">
+          <img id="preview" alt="Superstars badge preview">
+        </div>
+
+        <div class="status" id="status" role="status" aria-live="polite"></div>
+      </div>
+    </section>
+
+    <p class="hint">Tip: if your repo has no matches yet, the badge will say so. That is still useful information.</p>
+
+    <nav class="links" aria-label="Project links">
+      <a href="https://github.com/ron-ulitsky/superstars">GitHub</a>
+      <a href="https://github.com/ron-ulitsky/superstars/blob/main/data/superstars.json">Superstars list</a>
+      <a href="https://github.com/ron-ulitsky/superstars/blob/main/SUPERSTARS.md">Suggest changes</a>
+      <a href="https://github.com/ron-ulitsky/superstars/blob/main/EXAMPLES.md">Examples</a>
+    </nav>
+  </main>
+
+  <script>
+    const origin = ${JSON.stringify(origin)};
+    const repoInput = document.querySelector("#repo");
+    const themeInput = document.querySelector("#theme");
+    const markdown = document.querySelector("#markdown");
+    const url = document.querySelector("#url");
+    const preview = document.querySelector("#preview");
+    const status = document.querySelector("#status");
+
+    function normalizeRepo(value) {
+      return value
+        .trim()
+        .replace(/^https:\\/\\/github\\.com\\//, "")
+        .replace(/\\.git$/, "")
+        .replace(/^\\/+|\\/+$/g, "");
+    }
+
+    function update() {
+      const repo = normalizeRepo(repoInput.value) || "owner/repo";
+      const theme = themeInput.value;
+      const params = theme === "dark" ? "?theme=dark" : "";
+      const imageUrl = origin + "/" + repo + ".svg" + params;
+      const markdownValue = "![Notable people who starred this project](" + imageUrl + ")";
+
+      url.value = imageUrl;
+      markdown.value = markdownValue;
+      preview.src = imageUrl;
+    }
+
+    async function copy(value, label) {
+      try {
+        await navigator.clipboard.writeText(value);
+        status.textContent = "Copied " + label + ".";
+      } catch {
+        status.textContent = "Select the text and copy it manually.";
+      }
+    }
+
+    repoInput.addEventListener("input", update);
+    themeInput.addEventListener("change", update);
+    document.querySelector("#copyMarkdown").addEventListener("click", () => copy(markdown.value, "Markdown"));
+    document.querySelector("#copyMarkdown2").addEventListener("click", () => copy(markdown.value, "Markdown"));
+    document.querySelector("#copyUrl").addEventListener("click", () => copy(url.value, "URL"));
+    update();
+  </script>
+</body>
+</html>`;
 }
 
 function renderErrorSvg(error) {

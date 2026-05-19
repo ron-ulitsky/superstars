@@ -37,17 +37,11 @@ theme=light|dark
 
 ## Try It On Your Repo
 
-Replace `owner/repo` with your repository:
+Use the live generator:
 
-```text
-https://superstars.onrender.com/owner/repo.svg
-```
+https://superstars.onrender.com/
 
-Then paste it into Markdown:
-
-```md
-![Notable people who starred this project](https://superstars.onrender.com/owner/repo.svg)
-```
+Enter a repository, preview the badge, and copy the Markdown snippet for your README.
 
 The badge displays matching accounts from the Superstars list and includes a footer pointing back to the list source:
 
