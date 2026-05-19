@@ -4,6 +4,8 @@ import { writeFile } from "node:fs/promises";
 import { closePool, query } from "../lib/db.mjs";
 
 const outputPath = new URL("../Underrated repos noticed by Superstars.md", import.meta.url);
+const reportLimit = 100;
+const candidateLimit = 500;
 
 const underratedReposQuery = `
 WITH superstar_matches AS (
@@ -32,13 +34,14 @@ ORDER BY
   r.stargazer_count ASC NULLS LAST,
   m.superstar_count DESC,
   r.pushed_at DESC
-LIMIT 100;
+LIMIT ${candidateLimit};
 `;
 
 try {
   const result = await query(underratedReposQuery);
-  await writeFile(outputPath, renderMarkdown(result.rows), "utf8");
-  console.log(`Wrote ${result.rows.length} underrated repos to ${outputPath.pathname}`);
+  const rows = await excludeContributorRepos(result.rows);
+  await writeFile(outputPath, renderMarkdown(rows), "utf8");
+  console.log(`Wrote ${rows.length} underrated repos to ${outputPath.pathname}`);
 } catch (error) {
   console.error(`Failed to update underrated repos: ${error.message}`);
   process.exitCode = 1;
@@ -54,7 +57,7 @@ function renderMarkdown(rows) {
 
   return `# Underrated Repos Noticed by Superstars
 
-Recently active, non-fork repositories with the fewest GitHub stars that have still been starred by at least one account on the Superstars list, excluding self-stars.
+Recently active, non-fork repositories with the fewest GitHub stars that have still been starred by at least one account on the Superstars list, excluding self-stars and repos where a matching Superstar is a commit contributor.
 
 Generated from the indexed database on ${generatedAt}.
 
@@ -63,6 +66,8 @@ Generated from the indexed database on ${generatedAt}.
 ${table}
 
 ## Query
+
+The SQL query fetches candidate repositories and excludes self-stars. The report script then calls GitHub's contributors API and removes repositories where a matching Superstar is a commit contributor.
 
 \`\`\`sql
 ${underratedReposQuery.trim()}
@@ -91,6 +96,80 @@ AND r.pushed_at >= NOW() - INTERVAL '180 days'
 AND r.stargazer_count >= 10
 \`\`\`
 `;
+}
+
+async function excludeContributorRepos(rows) {
+  const filtered = [];
+
+  for (const row of rows) {
+    if (filtered.length >= reportLimit) {
+      break;
+    }
+
+    const superstarLogins = row.superstars
+      .split(",")
+      .map((login) => login.trim().toLowerCase())
+      .filter(Boolean);
+
+    if (await hasContributor(row.repo_full_name, superstarLogins)) {
+      continue;
+    }
+
+    filtered.push(row);
+  }
+
+  return filtered;
+}
+
+async function hasContributor(repoFullName, logins) {
+  if (!process.env.GITHUB_TOKEN && !process.env.GH_TOKEN) {
+    return false;
+  }
+
+  const targets = new Set(logins);
+  let page = 1;
+
+  while (page <= 4) {
+    const contributors = await fetchContributors(repoFullName, page);
+    if (contributors.length === 0) {
+      return false;
+    }
+
+    if (contributors.some((contributor) => targets.has(contributor.login?.toLowerCase()))) {
+      return true;
+    }
+
+    if (contributors.length < 100) {
+      return false;
+    }
+
+    page += 1;
+  }
+
+  return false;
+}
+
+async function fetchContributors(repoFullName, page) {
+  const token = process.env.GITHUB_TOKEN || process.env.GH_TOKEN;
+  const response = await fetch(`https://api.github.com/repos/${repoFullName}/contributors?per_page=100&page=${page}&anon=false`, {
+    headers: {
+      Accept: "application/vnd.github+json",
+      Authorization: `Bearer ${token}`,
+      "User-Agent": "superstars",
+      "X-GitHub-Api-Version": "2022-11-28",
+    },
+  });
+
+  if (response.status === 204 || response.status === 404 || response.status === 409) {
+    return [];
+  }
+
+  if (!response.ok) {
+    const body = await response.text();
+    throw new Error(`GitHub contributors ${response.status} for ${repoFullName}: ${body.slice(0, 200)}`);
+  }
+
+  return response.json();
 }
 
 function renderRow(row, rank) {

@@ -18,6 +18,7 @@ jobs:
       - run: npm run report:underrated
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          GITHUB_TOKEN: ${{ secrets.SUPERSTARS_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
       - name: Commit report
         run: |
           if git diff --quiet -- "Underrated repos noticed by Superstars.md"; then
