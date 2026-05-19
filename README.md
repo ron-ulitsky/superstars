@@ -64,7 +64,7 @@ format=compact-blurbs|card|compact
 
 ## How It Works
 
-Superstars maintains a curated list in [`data/superstars.json`](./data/superstars.json). Each entry has a GitHub login, display name, and a short blurb describing why the account is notable.
+Superstars maintains a curated list in [`superstars.json`](./superstars.json). Each entry has a GitHub login, display name, and a short blurb describing why the account is notable.
 
 The hosted service indexes the public repositories starred by those accounts. When a badge is requested for `owner/repo`, it looks up which Superstars have starred that repo and renders the matches as an SVG.
 

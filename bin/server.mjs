@@ -406,7 +406,7 @@ function renderHomePage(request) {
 
     <nav class="links" aria-label="Project links">
       <a href="https://github.com/ron-ulitsky/superstars">GitHub</a>
-      <a href="https://github.com/ron-ulitsky/superstars/blob/main/data/superstars.json">Superstars list</a>
+      <a href="https://github.com/ron-ulitsky/superstars/blob/main/superstars.json">Superstars list</a>
       <a href="https://github.com/ron-ulitsky/superstars/blob/main/SUPERSTARS.md">Suggest changes</a>
       <a href="https://github.com/ron-ulitsky/superstars/blob/main/EXAMPLES.md">Examples</a>
     </nav>

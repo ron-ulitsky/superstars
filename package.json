@@ -11,6 +11,7 @@
     "demo": "node ./bin/superstars.mjs --demo --repo owner/repo --output superstars.svg",
     "db:migrate": "node ./bin/migrate.mjs",
     "sync": "node ./bin/sync-superstars.mjs",
+    "report:underrated": "node ./bin/update-underrated-repos.mjs",
     "serve": "node ./bin/server.mjs",
     "check": "node --check ./bin/superstars.mjs && node --check ./bin/server.mjs && node ./bin/superstars.mjs --demo --repo owner/repo --output superstars.svg --limit 5"
   },

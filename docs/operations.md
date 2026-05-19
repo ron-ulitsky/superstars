@@ -44,7 +44,7 @@ Run the migration once:
 npm run db:migrate
 ```
 
-Then run the sync job to index every account in [`data/superstars.json`](../data/superstars.json):
+Then run the sync job to index every account in [`superstars.json`](../superstars.json):
 
 ```sh
 npm run sync

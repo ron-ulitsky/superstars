@@ -6,7 +6,7 @@ The list is not meant to be objective, complete, or permanent. It should be usef
 
 ## Suggesting Changes
 
-Open a pull request that edits [`data/superstars.json`](./data/superstars.json).
+Open a pull request that edits [`superstars.json`](./superstars.json).
 
 Each entry should include:
 

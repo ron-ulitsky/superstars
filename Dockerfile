@@ -4,8 +4,8 @@ WORKDIR /app
 COPY package.json ./
 RUN npm install --omit=dev
 
+COPY superstars.json ./
 COPY bin ./bin
-COPY data ./data
 COPY lib ./lib
 COPY sql ./sql
 

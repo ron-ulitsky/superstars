@@ -13,7 +13,7 @@ export const DEFAULTS = {
   format: "compact-blurbs",
 };
 
-const superstarsPath = new URL("../data/superstars.json", import.meta.url);
+const superstarsPath = new URL("../superstars.json", import.meta.url);
 const listRepo = "ron-ulitsky/superstars";
 const listUrl = "https://github.com/ron-ulitsky/superstars";
 
