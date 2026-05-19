@@ -8,6 +8,20 @@ Superstars adds a different kind of signal: **who** starred a repository.
 
 Instead of treating every star as equal, this project checks whether a repo has been starred by people on a curated list of prominent technical accounts. A star from a known maintainer, language creator, educator, researcher, or respected builder is not proof that a project is good, but it is harder to fake than raw star volume and often more informative than the total count.
 
+## Try It On Your Repo
+
+Use the live generator:
+
+https://superstars.onrender.com/
+
+Enter a repository, preview the badge, and copy the Markdown snippet for your README.
+
+The badge displays matching accounts from the Superstars list and includes a footer pointing back to the list source:
+
+```text
+Superstars list: ron-ulitsky/superstars
+```
+
 ## Usage
 
 Add this to a README:
@@ -46,20 +60,6 @@ Supported URL options:
 limit=6
 theme=light|dark
 format=compact-blurbs|card|compact
-```
-
-## Try It On Your Repo
-
-Use the live generator:
-
-https://superstars.onrender.com/
-
-Enter a repository, preview the badge, and copy the Markdown snippet for your README.
-
-The badge displays matching accounts from the Superstars list and includes a footer pointing back to the list source:
-
-```text
-Superstars list: ron-ulitsky/superstars
 ```
 
 ## How It Works
