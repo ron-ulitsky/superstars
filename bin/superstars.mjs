@@ -598,11 +598,26 @@ function toPositiveInt(value, label) {
 }
 
 function normalizeFormat(value) {
-  if (value === "card" || value === "compact" || value === "compact-blurbs") {
-    return value;
+  const normalized = String(value)
+    .trim()
+    .toLowerCase()
+    .replaceAll("_", "-")
+    .replaceAll("+", "-")
+    .replace(/\s+/g, "-");
+
+  if (normalized === "default" || normalized === "full") {
+    return "card";
   }
 
-  throw new Error("--format must be card, compact, or compact-blurbs");
+  if (normalized === "card" || normalized === "compact" || normalized === "compact-blurbs") {
+    return normalized;
+  }
+
+  if (normalized === "compact-with-blurbs" || normalized === "compact-and-blurbs") {
+    return "compact-blurbs";
+  }
+
+  throw new Error("format must be card, compact, or compact-blurbs");
 }
 
 function formatNumber(value) {
