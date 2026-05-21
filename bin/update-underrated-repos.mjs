@@ -12,7 +12,20 @@ WITH superstar_matches AS (
   SELECT
     ss.repo_full_name,
     COUNT(*) AS superstar_count,
-    STRING_AGG(s.login, ', ' ORDER BY s.list_rank) AS superstars
+    STRING_AGG(s.login, ', ' ORDER BY s.list_rank) AS superstar_logins,
+    STRING_AGG(
+      CONCAT(
+        COALESCE(NULLIF(s.name, ''), s.login),
+        ' (@',
+        s.login,
+        ')',
+        CASE
+          WHEN s.blurb IS NULL OR trim(s.blurb) = '' THEN ''
+          ELSE CONCAT(' - ', s.blurb)
+        END
+      ),
+      '<br>' ORDER BY s.list_rank
+    ) AS superstar_details
   FROM superstar_stars ss
   JOIN superstars s ON s.login = ss.login
   WHERE lower(split_part(ss.repo_full_name, '/', 1)) <> lower(s.login)
@@ -23,7 +36,8 @@ SELECT
   r.stargazer_count,
   r.pushed_at::date AS last_pushed,
   m.superstar_count,
-  m.superstars,
+  m.superstar_logins,
+  m.superstar_details,
   r.url,
   r.description
 FROM superstar_matches m
@@ -87,7 +101,20 @@ WITH superstar_matches AS (
   SELECT
     ss.repo_full_name,
     COUNT(*) AS superstar_count,
-    STRING_AGG(s.login, ', ' ORDER BY s.list_rank) AS superstars
+    STRING_AGG(s.login, ', ' ORDER BY s.list_rank) AS superstar_logins,
+    STRING_AGG(
+      CONCAT(
+        COALESCE(NULLIF(s.name, ''), s.login),
+        ' (@',
+        s.login,
+        ')',
+        CASE
+          WHEN s.blurb IS NULL OR trim(s.blurb) = '' THEN ''
+          ELSE CONCAT(' - ', s.blurb)
+        END
+      ),
+      '<br>' ORDER BY s.list_rank
+    ) AS superstar_details
   FROM superstar_stars ss
   JOIN superstars s ON s.login = ss.login
   WHERE lower(split_part(ss.repo_full_name, '/', 1)) <> lower(s.login)
@@ -109,7 +136,7 @@ async function excludeContributorRepos(rows) {
       break;
     }
 
-    const superstarLogins = row.superstars
+    const superstarLogins = row.superstar_logins
       .split(",")
       .map((login) => login.trim().toLowerCase())
       .filter(Boolean);
@@ -180,11 +207,19 @@ function renderRow(row, rank) {
   const url = row.url || `https://github.com/${row.repo_full_name}`;
   const stars = row.stargazer_count ?? "";
   const pushed = formatDate(row.last_pushed);
-  const superstars = escapeMarkdown(row.superstars || "");
+  const superstars = formatSuperstars(row.superstar_details || row.superstar_logins || "");
   const superstarCount = Number(row.superstar_count || 0);
   const suffix = superstarCount > 1 ? ` (${superstarCount})` : "";
   const description = escapeMarkdown(row.description || "");
   return `| ${rank} | [${repo}](${url}) | ${stars} | ${pushed} | ${superstars}${suffix} | ${description} |`;
+}
+
+function formatSuperstars(value) {
+  return String(value)
+    .split("<br>")
+    .map((entry) => escapeMarkdown(entry.trim()))
+    .filter(Boolean)
+    .join("<br>");
 }
 
 function formatDate(value) {
