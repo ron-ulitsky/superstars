@@ -33,6 +33,8 @@ WHERE r.is_fork IS FALSE
   AND r.description IS NOT NULL
   AND length(trim(r.description)) > 0
   AND lower(split_part(r.repo_full_name, '/', 2)) <> lower(split_part(r.repo_full_name, '/', 1))
+  AND lower(split_part(r.repo_full_name, '/', 2)) !~ '(^|[-_.])(dotfiles?|resume|cv|homepage|website|portfolio|profile)([-_.]|$)'
+  AND lower(r.description) !~ '(^|\\W)(dotfiles?|resume|cv|homepage|personal website|portfolio|profile)(\\W|$)'
   AND r.pushed_at >= NOW() - INTERVAL '90 days'
 ORDER BY
   r.stargazer_count ASC NULLS LAST,
@@ -61,7 +63,7 @@ function renderMarkdown(rows) {
 
   return `# Underrated Repos Noticed by Superstars
 
-Recently active, non-fork repositories with 10-1000 GitHub stars and a non-empty description that have still been starred by at least one account on the Superstars list, excluding profile repos, self-stars, and repos where a matching Superstar is a commit contributor.
+Recently active, non-fork repositories with 10-1000 GitHub stars and a non-empty description that have still been starred by at least one account on the Superstars list, excluding profile/personal repos, self-stars, and repos where a matching Superstar is a commit contributor.
 
 Generated from the indexed database on ${generatedAt}.
 
