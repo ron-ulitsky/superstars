@@ -29,7 +29,7 @@ SELECT
 FROM superstar_matches m
 JOIN github_repos r ON r.repo_full_name = m.repo_full_name
 WHERE r.is_fork IS FALSE
-  AND r.stargazer_count BETWEEN 10 AND 1000
+  AND r.stargazer_count BETWEEN 500 AND 1000
   AND r.description IS NOT NULL
   AND length(trim(r.description)) > 0
   AND lower(split_part(r.repo_full_name, '/', 2)) <> lower(split_part(r.repo_full_name, '/', 1))
@@ -63,7 +63,7 @@ function renderMarkdown(rows) {
 
   return `# Underrated Repos Noticed by Superstars
 
-Recently active, non-fork repositories with 10-1000 GitHub stars and a non-empty description that have still been starred by at least one account on the Superstars list, excluding profile/personal repos, self-stars, and repos where a matching Superstar is a commit contributor.
+Recently active, non-fork repositories with 500-1000 GitHub stars and a non-empty description that have still been starred by at least one account on the Superstars list, excluding profile/personal repos, self-stars, and repos where a matching Superstar is a commit contributor.
 
 Generated from the indexed database on ${generatedAt}.
 
